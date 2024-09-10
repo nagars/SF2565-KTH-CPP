@@ -20,6 +20,8 @@ double func_simpsons_rule(double begin_limit, double end_limit, double tolerance
 
 	// Return [(β −α)/6 * (f(α)+4f((α+β)/2)+f(β))]
 
+	// Alessio was here
+
 }
 
 
