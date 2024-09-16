@@ -5,10 +5,30 @@
  *      Author: root
  */
 
-int main(){
+#include <cmath>
+#include <vector>
 
+#include "utest/utest.h"
+//#include Problem 1's header
 
-	return 1;
+using namespace std;
+
+UTEST_STATE();		//instantiate test cases and build test framework
+
+/** Define Example Test cases **/
+//Para 1: Name of test set/group, Test Name
+UTEST(IS_ASSERT_TRUE, TEST1) {
+	ASSERT_TRUE(1);
+}
+
+UTEST(IS_ASSERT_FALSE, TEST1) {
+	ASSERT_TRUE(0);
+}
+
+// Run test cases
+int main(int argc, const char *const argv[]){
+
+	return utest_main(argc, argv);	// Call test framework
 }
 
 
