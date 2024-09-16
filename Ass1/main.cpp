@@ -6,8 +6,10 @@
  */
 
 #include <cmath>
+#include <stdint.h>
+#include <iostream>
 
-namespace std;
+using namespace std;
 
 // Function to test
 double func1 (double x){
@@ -25,7 +27,7 @@ double func_simpsons_rule(double begin_limit, double end_limit, double tolerance
 }
 
 
-double func_ASI(double(*f)(double), double begin_limit, double end_limit, double tolerance){
+double func_ASI(double(*f)(double), double begin_limit, double end_limit, double tolerance, uint32_t* func_call_counter){
 
 	// Initialisations
 	double x = 0;			// fed to function to be tested
@@ -33,6 +35,11 @@ double func_ASI(double(*f)(double), double begin_limit, double end_limit, double
 	double integral_2 = 0;	// I2 integration  I2(α,β)
 	double midpoint = 0;	// midpoint calculation for I2 (γ)
 	double error = 0;		// error of simpsons calculation
+
+	// Check for null pointer
+
+	// Increment function call counter
+	*func_call_counter++;
 
 	// Check if begin_limit < end_limit, else return with -1
 
@@ -58,8 +65,10 @@ double func_ASI(double(*f)(double), double begin_limit, double end_limit, double
 
 int main(){
 
+	uint32_t func_counter = 0;
 	// Call recursive function
 
+	cout << "Number of function calls : " << func_counter << endl;
 	return 1;
 }
 
