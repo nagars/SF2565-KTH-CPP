@@ -8,11 +8,13 @@
 #include "adaptive_integration.hpp"
 
 ////Simpsons functions////
-double func_simpsons_rule(double begin_limit, double end_limit, double tolerance){
+double func_simpsons_rule( const std::function<double(double)>& func_f,
+						  double begin_limit,
+	                      double end_limit,
+	                      double tolerance) {
 
-	// Return [(β −α)/6 * (f(α)+4f((α+β)/2)+f(β))]
-
-	// Alessio was here
+	double midpoint = (begin_limit + end_limit) / 2;
+	return (end_limit - begin_limit) / 6 * (func_f(begin_limit) + 4 * func_f(midpoint) + func_f(end_limit));
 
 }
 
