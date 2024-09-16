@@ -24,4 +24,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>adaptive_integration.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Problem1/adaptive_integration.cpp</locationURI>
+		</link>
+		<link>
+			<name>adaptive_integration.hpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Problem1/adaptive_integration.hpp</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

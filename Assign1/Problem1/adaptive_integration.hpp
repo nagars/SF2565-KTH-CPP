@@ -10,8 +10,10 @@
 
 #include <cmath>
 #include <stdint.h>
+#include <vector>
+#include <functional>
 
-double func_simpsons_rule(double begin_limit, double end_limit, double tolerance);
+double func_simpsons_rule(const std::function<double(double)>& func_f, double begin_limit, double end_limit, double tolerance);
 double func_ASI(double(*f)(double), double begin_limit, double end_limit, double tolerance, uint32_t* func_call_counter);
 
 #endif /* ADAPTIVE_INTEGRATION_HPP_ */

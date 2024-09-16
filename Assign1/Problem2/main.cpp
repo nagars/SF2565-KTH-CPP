@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "utest/utest.h"
-//#include Problem 1's header
+#include "../Problem1/adaptive_integration.hpp"		//Include functions to be tested
 
 using namespace std;
 
@@ -24,6 +24,7 @@ UTEST(IS_ASSERT_TRUE, TEST1) {
 UTEST(IS_ASSERT_FALSE, TEST1) {
 	ASSERT_TRUE(0);
 }
+/**/
 
 // Run test cases
 int main(int argc, const char *const argv[]){
