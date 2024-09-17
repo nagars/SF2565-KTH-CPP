@@ -51,17 +51,36 @@ double func_ASI(double(*func_f)(double),
 	midpoint = (begin_limit + end_limit) / 2;		// Calculate half intervals  γ = 1 / 2 * (α+β)
 
 	// Calculate I2 [ I2(α,β) := I(α,γ) + I(γ,β)]
-	double I2 = func_simpsons_rule(func_f, begin_limit, midpoint, tolerance) 
-		 + func_simpsons_rule(func_f, midpoint, end_limit, tolerance);
+	double I2 = func_simpsons_rule(
+					func_f,
+					begin_limit,
+					midpoint,
+					tolerance) 
+				+ func_simpsons_rule(
+					func_f,
+					midpoint,
+					end_limit,
+					tolerance);
 	
+	// Error estimate
+	double errest = std::abs(I2 - I1);
 
-	// Calculate error [errest = 1 / 15 * (I2(α,β) − I(α,β))]
-
-	// Check if within tolerance
-	if (abs(error) < 15 * tolerance){
-		return integral_2;
+	// Check if error estimate is within tolerance
+	if (errest < 15 * tolerance) {
+		return I2;
 	}
 
-	// Call function again [ASI(f,a,(a + b)/2,τ/2) + ASI(f,(a + b)/2,b,τ/2);]
-
+	// Call function again [ASI(f,a,γ,τ/2) + ASI(f,γ,b,τ/2)]
+	return func_ASI(
+				func_f,
+				begin_limit,
+				midpoint,
+				tolerance / 2,
+				func_call_counter)
+		 + func_ASI(
+			    func_f,
+				midpoint,
+			    end_limit,
+				tolerance / 2,
+				func_call_counter);
 }
