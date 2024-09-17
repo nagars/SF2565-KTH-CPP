@@ -19,7 +19,11 @@ double func_simpsons_rule( const std::function<double(double)>& func_f,
 }
 
 
-double func_ASI(double(*f)(double), double begin_limit, double end_limit, double tolerance, uint32_t* func_call_counter){
+double func_ASI(double(*func_f)(double),
+				double begin_limit,
+	            double end_limit,
+	            double tolerance,
+	            uint32_t* func_call_counter) {
 
 	// Initialisations
 	double x = 0;			// fed to function to be tested
@@ -28,18 +32,28 @@ double func_ASI(double(*f)(double), double begin_limit, double end_limit, double
 	double midpoint = 0;	// midpoint calculation for I2 (γ)
 	double error = 0;		// error of simpsons calculation
 
-	// Check for null pointer
+	if (func_call_counter) {			// Check for null pointer
+										// TODO need an error handler for: ptr == nullptr. See slides lecture 3 page 13
+		(*func_call_counter)++;			// Increment function call
+	}
 
-	// Increment function call counter
-	*func_call_counter++;
+	if (begin_limit > end_limit) { 		// Check if begin_limit < end_limit, else return with -1
+		return -1						// TODO should I return an error code, or handle the exception here?
+	}
 
-	// Check if begin_limit < end_limit, else return with -1
+	I1 = func_simpsons_rule(			// Calculate I1 (Call func_simpsons_rule)
+		func_f,
+		begin_limit,
+		end_limit,
+		tolerance
+	);
 
-	// Calculate I1 (Call func_simpsons_rule)
-
-	// Calculate half intervals  γ = 1 / 2 * (α+β)
+	midpoint = (begin_limit + end_limit) / 2;		// Calculate half intervals  γ = 1 / 2 * (α+β)
 
 	// Calculate I2 [ I2(α,β) := I(α,γ) + I(γ,β)]
+	I2 = func_simpsons_rule(func_f, begin_limit, midpoint, tolerance) 
+		 + func_simpsons_rule(func_f, midpoint, end_limit, tolerance);
+	
 
 	// Calculate error [errest = 1 / 15 * (I2(α,β) − I(α,β))]
 
