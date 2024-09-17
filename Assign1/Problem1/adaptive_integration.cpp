@@ -38,10 +38,10 @@ double func_ASI(double(*func_f)(double),
 	}
 
 	if (begin_limit > end_limit) { 		// Check if begin_limit < end_limit, else return with -1
-		return -1						// TODO should I return an error code, or handle the exception here?
+		return -1;						// TODO should I return an error code, or handle the exception here?
 	}
 
-	I1 = func_simpsons_rule(			// Calculate I1 (Call func_simpsons_rule)
+	double I1 = func_simpsons_rule(			// Calculate I1 (Call func_simpsons_rule)
 		func_f,
 		begin_limit,
 		end_limit,
@@ -51,7 +51,7 @@ double func_ASI(double(*func_f)(double),
 	midpoint = (begin_limit + end_limit) / 2;		// Calculate half intervals  γ = 1 / 2 * (α+β)
 
 	// Calculate I2 [ I2(α,β) := I(α,γ) + I(γ,β)]
-	I2 = func_simpsons_rule(func_f, begin_limit, midpoint, tolerance) 
+	double I2 = func_simpsons_rule(func_f, begin_limit, midpoint, tolerance) 
 		 + func_simpsons_rule(func_f, midpoint, end_limit, tolerance);
 	
 
