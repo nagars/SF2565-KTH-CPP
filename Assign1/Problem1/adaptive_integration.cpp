@@ -26,22 +26,26 @@ double func_ASI(double(*func_f)(double),
 	            uint32_t* func_call_counter) {
 
 	// Initialisations
-	double x = 0;			// fed to function to be tested
-	double integral_1 = 0;	// I1 integration I(α,β)
-	double integral_2 = 0;	// I2 integration  I2(α,β)
+	double I1 = 0;	// I1 integration I(α,β)
+	double I2 = 0;	// I2 integration  I2(α,β)
 	double midpoint = 0;	// midpoint calculation for I2 (γ)
-	double error = 0;		// error of simpsons calculation
+	double errest = 0;		// error of simpsons calculation
+
+	// Input validation
+	if (tolerance <= 0){		// Check tolerance is positive
+		return -1;
+	}
 
 	if (func_call_counter) {			// Check for null pointer
 										// TODO need an error handler for: ptr == nullptr. See slides lecture 3 page 13
-		(*func_call_counter)++;			// Increment function call
+		return -1;
 	}
 
 	if (begin_limit > end_limit) { 		// Check if begin_limit < end_limit, else return with -1
 		return -1;						// TODO should I return an error code, or handle the exception here?
 	}
 
-	double I1 = func_simpsons_rule(			// Calculate I1 (Call func_simpsons_rule)
+	I1 = func_simpsons_rule(			// Calculate I1 (Call func_simpsons_rule)
 		func_f,
 		begin_limit,
 		end_limit,
@@ -51,7 +55,7 @@ double func_ASI(double(*func_f)(double),
 	midpoint = (begin_limit + end_limit) / 2;		// Calculate half intervals  γ = 1 / 2 * (α+β)
 
 	// Calculate I2 [ I2(α,β) := I(α,γ) + I(γ,β)]
-	double I2 = func_simpsons_rule(
+	I2 = func_simpsons_rule(
 					func_f,
 					begin_limit,
 					midpoint,
@@ -63,7 +67,7 @@ double func_ASI(double(*func_f)(double),
 					tolerance);
 	
 	// Error estimate
-	double errest = std::abs(I2 - I1);
+	errest = std::abs(I2 - I1);
 
 	// Check if error estimate is within tolerance
 	if (errest < 15 * tolerance) {
