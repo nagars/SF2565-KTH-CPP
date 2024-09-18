@@ -17,14 +17,24 @@ UTEST_STATE();		//instantiate test cases and build test framework
 
 /** Define Example Test cases **/
 //Para 1: Name of test set/group, Test Name
-UTEST(IS_ASSERT_TRUE, TEST1) {
-	ASSERT_TRUE(1);
+//UTEST(IS_ASSERT_TRUE, TEST1) {
+//	ASSERT_TRUE(1);
+//}
+//
+//UTEST(IS_ASSERT_FALSE, TEST1) {
+//	ASSERT_TRUE(0);
+//}
+/**/
+
+
+// Function to test
+double func_x(double x){
+	return x;
 }
 
-UTEST(IS_ASSERT_FALSE, TEST1) {
-	ASSERT_TRUE(0);
+UTEST(IS_HALF, TEST1){
+	ASSERT_EQ(0.5, func_ASI(func_x, 0, 1, 0.005, 0));
 }
-/**/
 
 // Run test cases
 int main(int argc, const char *const argv[]){
