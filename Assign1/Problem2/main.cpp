@@ -36,6 +36,19 @@ UTEST(IS_HALF, TEST1){
 	ASSERT_EQ(0.5, func_ASI(func_x, 0, 1, 0.005, 0));
 }
 
+UTEST(EXCEPTIONS, NEG_TOLERANCE){
+	ASSERT_EQ(-1, func_ASI(func_x, 0, 1, -0.005, 0));
+}
+
+UTEST(EXCEPTIONS, NULL_FUNC_POINTER){
+	ASSERT_EQ(-1, func_ASI(0, 0, 1, 0.005, 0));
+}
+
+UTEST(EXCEPTIONS, INVALID_LIMITS){
+	ASSERT_EQ(-1, func_ASI(func_x, 1, 0, 0.005, 0));
+}
+
+
 // Run test cases
 int main(int argc, const char *const argv[]){
 
