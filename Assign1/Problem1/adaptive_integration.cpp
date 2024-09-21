@@ -57,6 +57,10 @@ double func_ASI(double(*func_f)(double),
 		return -1;
 	}
 
+
+	// Increment function counter
+	(*func_call_counter)++;
+
 	I1 = func_simpsons_rule(			// Calculate I1 (Call func_simpsons_rule)
 			func_f,
 			begin_limit,
