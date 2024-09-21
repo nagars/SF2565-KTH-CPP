@@ -2,7 +2,7 @@
  * adaptive_integration.h
  *
  *  Created on: Sep 16, 2024
- *      Author: Shawn
+ *      Author: Shawn / Alessio
  */
 
 #ifndef ADAPTIVE_INTEGRATION_HPP_

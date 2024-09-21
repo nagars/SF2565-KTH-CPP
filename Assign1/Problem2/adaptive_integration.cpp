@@ -2,7 +2,7 @@
  * adaptive_integration.cpp
  *
  *  Created on: Sep 16, 2024
- *      Author: Shawn
+ *      Author: Shawn / Alessio
  */
 
 #include "adaptive_integration.hpp"
