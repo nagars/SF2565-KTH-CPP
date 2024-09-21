@@ -8,24 +8,12 @@
 #include <cmath>
 #include <vector>
 
-#include "utest/utest.h"
-#include "../Problem1/adaptive_integration.hpp"		//Include functions to be tested
+#include "utest.h"
+#include "adaptive_integration.hpp"		//Include functions to be tested
 
 using namespace std;
 
 UTEST_STATE();		//instantiate test cases and build test framework
-
-/** Define Example Test cases **/
-//Para 1: Name of test set/group, Test Name
-//UTEST(IS_ASSERT_TRUE, TEST1) {
-//	ASSERT_TRUE(1);
-//}
-//
-//UTEST(IS_ASSERT_FALSE, TEST1) {
-//	ASSERT_TRUE(0);
-//}
-/**/
-
 
 // Function to test
 double func_x(double x){

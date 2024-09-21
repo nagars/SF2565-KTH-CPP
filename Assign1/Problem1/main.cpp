@@ -16,7 +16,6 @@ double func1 (double x){
 	return abs(x + cos(pow(x,5)));
 }
 
-
 int main(){
 
 	uint32_t func_counter = 0;
