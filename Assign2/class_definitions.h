@@ -39,6 +39,9 @@ class Rectangle {
 	// Checks if a particular point is within the rectangle
 	bool check_point_within_rect (Point p);
 
+	// Check if another rectangle intersects with this rectangle
+	bool intersects (Rectangle rhs);
+
 	private:
 	protected:
 
