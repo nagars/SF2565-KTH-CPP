@@ -33,6 +33,9 @@ class Rectangle {
 	//Default constructor
 	Rectangle();
 
+	// @Shawn: add constructor that takes bottomleft, topright
+	Rectangle(const Point& bottomLeft, const Point& topRight) {};
+
 	// Rectangle boundaries
 	Point bottomLeft, topRight;
 
@@ -47,4 +50,4 @@ class Rectangle {
 
 };
 
-#endif /* CLASS_DEFINITIONS_H_ */
+#endif /* CLASS_DEFINITIONS */
