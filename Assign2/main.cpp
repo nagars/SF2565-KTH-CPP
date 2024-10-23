@@ -5,7 +5,7 @@
  *      Author: Shawn / Alessio
  */
 
-#include "class_definitions.h"
+#include "class_definitions.hpp"
 
 
 int main (){

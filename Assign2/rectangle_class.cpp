@@ -6,7 +6,16 @@
  */
 
 
-#include "class_definitions.h"
+#include "class_definitions.hpp"
+
+Rectangle::Rectangle(void){
+
+}
+
+Rectangle::Rectangle(const Point bottomLeft, const Point topRight):
+				bottomLeft(bottomLeft), topRight(topRight){
+
+}
 
 
 bool Rectangle::check_point_within_rect (Point p){
@@ -16,4 +25,8 @@ bool Rectangle::check_point_within_rect (Point p){
 		return 1;
 	}
 	return 0;
+}
+
+bool Rectangle::intersects (Rectangle rhs){
+
 }
