@@ -34,7 +34,7 @@ public:
 	//Default constructor
 	Rectangle();
 
-	// @Shawn: add constructor that takes bottomleft, topright
+	//Constructor that takes bottomleft, topright
 	Rectangle(const Point bottomLeft, const Point topRight);
 
 	// Checks if a particular point is within the rectangle
@@ -55,31 +55,31 @@ class Quadtree {
 
 public :
 	// Constructor for specified boundary
-	Quadtree(const Rectangle& boundary, int bucketSize);
+	Quadtree(const Rectangle& boundary, unsigned long bucketSize);
 
 	// Constructor automatically calculating boundary
-	Quadtree(std::vector<Point>& pointCollection, int bucketSize);
+	Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize);
 
 	// Destructor
 	~Quadtree();
 
-	// Check if leaf is over bucket size
-	void exceedsBucketSize();
-
-	// Insert a point
+	// Insert a point in a unique quatrant
 	bool insert(const Point &p);
-
-	// Subdivide the current node
-	void subdivide();
 
 	std::vector<Point> query(Rectangle rect);
 
 private :
 
-	int m_bucketSize;                // max. No of points per leaf
-	Rectangle m_boundary;            // boundary of whole quadtree
-	std::vector<Point> m_points;     // points in leaf node
-	bool m_divided;                  // has children
+	// Subdivide the current node into 4 quadtrants
+	void subdivide();
+
+	// Check if leaf is over bucket size
+	void exceedsBucketSize();
+
+	unsigned long m_bucketSize;      // max. No of points per node allowed
+	Rectangle m_boundary;            // boundary of node
+	std::vector<Point> m_points;     // points in node
+	//bool m_divided;                  // Flag to track if rectangle has children
 
 	// Child quadtrees
 	Quadtree* m_northWest;
