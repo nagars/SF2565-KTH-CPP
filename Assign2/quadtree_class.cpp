@@ -9,13 +9,10 @@
 
 #include "class_definitions.hpp"
 
-void Quadtree::exceedsBucketSize(){
-	// bucket size check logic
-}
-
+sf::MplWriter<Point, Rectangle> writer("plot.py");
 
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
-: m_bucketSize(bucketSize), m_boundary(boundary), /*m_divided(false),*/
+: m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr){
 
@@ -23,7 +20,7 @@ Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 
 // Constructor automatically calculating boundary
 Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize)
-: m_bucketSize(bucketSize), /*m_divided(false),*/
+: m_bucketSize(bucketSize), m_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr) {
 
@@ -62,10 +59,20 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 	for (const Point& p : pointCollection) {
 		insert(p);
 	}
+
 }
 
 // Destructor
 Quadtree::~Quadtree() {
+
+	// Visualise boundary of node
+	writer << m_boundary;
+
+	// Visualise points in this node
+	if(!m_points.empty()){
+		writer << m_points;
+	}
+
 	delete m_northWest;
 	delete m_northEast;
 	delete m_southWest;
@@ -78,7 +85,7 @@ bool Quadtree::insert(const Point &p) {
 	// Check if the point falls within the boundary of
 	// the current rectangle
 	// Return false if not inside
-	if (!m_boundary.check_point_within_rect(p)) {
+	if (false == m_boundary.check_point_within_rect(p)) {
 		return false;
 	}
 
@@ -90,9 +97,9 @@ bool Quadtree::insert(const Point &p) {
 
 	// If point falls inside current node but exceeds max number
 	// of points allowed, divide node further
-	//if (!m_divided) {
-	subdivide();
-	//}
+	if (!m_divided) {
+		subdivide();
+	}
 
 	// Insert point into newly generated quadrants
 	// Recursively continue until successful
@@ -135,7 +142,7 @@ void Quadtree::subdivide() {
 			m_bucketSize);
 
 	// Set flag that quad has been divided
-	//m_divided = true;
+	m_divided = true;
 }
 
 std::vector<Point> Quadtree::query(Rectangle rect) {

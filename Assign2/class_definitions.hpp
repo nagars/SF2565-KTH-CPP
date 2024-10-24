@@ -11,6 +11,8 @@
 #include <math.h>
 #include <vector>
 
+#include "utilities_v3/mpl_writer.hpp"
+
 class Point {
 public:
 	// Default Constructor
@@ -73,13 +75,10 @@ private :
 	// Subdivide the current node into 4 quadtrants
 	void subdivide();
 
-	// Check if leaf is over bucket size
-	void exceedsBucketSize();
-
 	unsigned long m_bucketSize;      // max. No of points per node allowed
 	Rectangle m_boundary;            // boundary of node
 	std::vector<Point> m_points;     // points in node
-	//bool m_divided;                  // Flag to track if rectangle has children
+	bool m_divided;                  // Flag to track if rectangle has children
 
 	// Child quadtrees
 	Quadtree* m_northWest;

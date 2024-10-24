@@ -20,8 +20,8 @@ Rectangle::Rectangle(const Point bottomLeft, const Point topRight):
 
 bool Rectangle::check_point_within_rect (Point p){
 
-	if ((abs(p.x) >= abs(bottomLeft.x) || abs(p.y) >= abs(bottomLeft.y)) &&
-			((abs(p.x) <= abs(topRight.x) || abs(p.y) <= abs(topRight.y)))){
+	if ((p.x >= bottomLeft.x && p.y >= bottomLeft.y) &&
+			((p.x <= topRight.x && p.y <= topRight.y))){
 		return 1;
 	}
 	return 0;
