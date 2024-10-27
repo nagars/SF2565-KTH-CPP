@@ -68,6 +68,12 @@ public :
 	// Insert a point in a unique quatrant
 	bool insert(const Point &p);
 
+	// For each node, collects the relevant boundary and points
+	// Returns a vector of (boundaries, points) tuples
+	void collectNodes(std::vector<Rectangle>& boundaries,
+	 				  std::vector<std::vector<Point>>& points) const;
+
+	// Returns all the points that fall within a specified rectangle
 	std::vector<Point> query(Rectangle rect);
 
 private :
