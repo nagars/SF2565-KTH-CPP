@@ -8,7 +8,7 @@
 #include <iostream>
 #include "class_definitions.hpp"
 
-sf::MplWriter<Point, Rectangle> writer("plot.py");
+//sf::MplWriter<Point, Rectangle> writer("plot.py");
 
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 : m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
@@ -65,17 +65,17 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 // Destructor
 Quadtree::~Quadtree() {
 
-	// Visualise boundary of node
-	writer << m_boundary;
-
-	// Check if leaf node. Only write
-	// points in leaf nodes
-	if(!m_divided){
-		// Visualise points in this node
-		if(!m_points.empty()){
-			writer << m_points;
-		}
-	}
+	//	// Visualise boundary of node
+	//	writer << m_boundary;
+	//
+	//	// Check if leaf node. Only write
+	//	// points in leaf nodes
+	//	if(!m_divided){
+	//		// Visualise points in this node
+	//		if(!m_points.empty()){
+	//			writer << m_points;
+	//		}
+	//	}
 
 }
 
@@ -116,17 +116,19 @@ bool Quadtree::insert(const Point &p) {
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
 		std::vector<std::vector<Point>>& points) const {
 
-	// Collect this node's boundary and points
-	boundaries.push_back(m_boundary);
-	points.push_back(m_points);
+	// Collect leaf node's boundary and points
+	if (!m_divided) {
+		boundaries.push_back(m_boundary);
+		points.push_back(m_points);
+		return;
+	}
 
 	// Recursively collect from subdivided quadrants if they exist
-	if (m_divided) {
-		m_northWest->collectNodes(boundaries, points);
-		m_northEast->collectNodes(boundaries, points);
-		m_southWest->collectNodes(boundaries, points);
-		m_southEast->collectNodes(boundaries, points);
-	}
+	m_northWest->collectNodes(boundaries, points);
+	m_northEast->collectNodes(boundaries, points);
+	m_southWest->collectNodes(boundaries, points);
+	m_southEast->collectNodes(boundaries, points);
+
 
 }
 
