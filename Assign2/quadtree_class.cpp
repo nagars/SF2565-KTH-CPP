@@ -8,8 +8,6 @@
 #include <iostream>
 #include "class_definitions.hpp"
 
-//sf::MplWriter<Point, Rectangle> writer("plot.py");
-
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 : m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
