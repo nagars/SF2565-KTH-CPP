@@ -10,7 +10,7 @@
 #include "utilities_v3/random_points.hpp"
 #include "utilities_v3/mpl_writer.hpp"
 
-#define BUCKETSIZE 20
+#define BUCKETSIZE 5
 
 int main (){
 

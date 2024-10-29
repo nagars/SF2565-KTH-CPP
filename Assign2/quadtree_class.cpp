@@ -104,17 +104,19 @@ bool Quadtree::insert(const Point &p) {
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
 	 			  std::vector<std::vector<Point>>& points) const {
 	
-	// Collect this node's boundary and points
-    boundaries.push_back(m_boundary);
-    points.push_back(m_points);
+	// Collect this node's boundary and point
 	
 	// Recursively collect from subdivided quadrants if they exist
-    if (m_divided) {
+    if (!m_divided) {
+		boundaries.push_back(m_boundary);
+		points.push_back(m_points);
+    }
+	else {
         m_northWest->collectNodes(boundaries, points);
         m_northEast->collectNodes(boundaries, points);
         m_southWest->collectNodes(boundaries, points);
         m_southEast->collectNodes(boundaries, points);
-    }
+	}
 
 }
 
