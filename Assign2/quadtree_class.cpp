@@ -8,6 +8,8 @@
 #include <iostream>
 #include "class_definitions.hpp"
 
+sf::MplWriter<Point, Rectangle> writer("plot.py");
+
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 : m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
@@ -59,12 +61,22 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 
 }
 
+
 // Destructor
 Quadtree::~Quadtree() {
-	delete m_northWest;
-	delete m_northEast;
-	delete m_southWest;
-	delete m_southEast;
+
+	// Visualise boundary of node
+	writer << m_boundary;
+
+	// Check if leaf node. Only write
+	// points in leaf nodes
+	if(!m_divided){
+		// Visualise points in this node
+		if(!m_points.empty()){
+			writer << m_points;
+		}
+	}
+
 }
 
 // Insert a point
@@ -102,19 +114,19 @@ bool Quadtree::insert(const Point &p) {
 // Traverse the tree, get the (boundary, points) pair for each node,
 // and return a vector of (boundary, points) pairs.
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
-	 			  std::vector<std::vector<Point>>& points) const {
-	
+		std::vector<std::vector<Point>>& points) const {
+
 	// Collect this node's boundary and points
-    boundaries.push_back(m_boundary);
-    points.push_back(m_points);
-	
+	boundaries.push_back(m_boundary);
+	points.push_back(m_points);
+
 	// Recursively collect from subdivided quadrants if they exist
-    if (m_divided) {
-        m_northWest->collectNodes(boundaries, points);
-        m_northEast->collectNodes(boundaries, points);
-        m_southWest->collectNodes(boundaries, points);
-        m_southEast->collectNodes(boundaries, points);
-    }
+	if (m_divided) {
+		m_northWest->collectNodes(boundaries, points);
+		m_northEast->collectNodes(boundaries, points);
+		m_southWest->collectNodes(boundaries, points);
+		m_southEast->collectNodes(boundaries, points);
+	}
 
 }
 
@@ -128,22 +140,22 @@ void Quadtree::subdivide() {
 			+ m_boundary.topRight.y) / 2.0;
 
 	// Split rectangle into 4 quadrants
-	m_northWest = new Quadtree(Rectangle(
+	m_northWest = std::make_unique<Quadtree>(Rectangle(
 			Point(m_boundary.bottomLeft.x, midY),
 			Point(midX, m_boundary.topRight.y)),
 			m_bucketSize);
 
-	m_northEast = new Quadtree(Rectangle(
+	m_northEast = std::make_unique<Quadtree>(Rectangle(
 			Point(midX, midY),
 			m_boundary.topRight),
 			m_bucketSize);
 
-	m_southWest = new Quadtree(Rectangle(
+	m_southWest = std::make_unique<Quadtree>(Rectangle(
 			m_boundary.bottomLeft,
 			Point(midX, midY)),
 			m_bucketSize);
 
-	m_southEast = new Quadtree(Rectangle(
+	m_southEast = std::make_unique<Quadtree>(Rectangle(
 			Point(midX, m_boundary.bottomLeft.y),
 			Point(m_boundary.topRight.x, midY)),
 			m_bucketSize);

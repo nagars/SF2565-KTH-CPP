@@ -10,6 +10,7 @@
 
 #include <math.h>
 #include <vector>
+#include <memory>
 
 #include "utilities_v3/mpl_writer.hpp"
 
@@ -87,10 +88,10 @@ private :
 	bool m_divided;                  // Flag to track if rectangle has children
 
 	// Child quadtrees
-	Quadtree* m_northWest;
-	Quadtree* m_northEast;
-	Quadtree* m_southWest;
-	Quadtree* m_southEast;
+	std::unique_ptr<Quadtree> m_northWest;
+	std::unique_ptr<Quadtree> m_northEast;
+	std::unique_ptr<Quadtree> m_southWest;
+	std::unique_ptr<Quadtree> m_southEast;
 };
 
 
