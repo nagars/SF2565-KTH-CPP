@@ -74,8 +74,7 @@ public :
 	 				  std::vector<std::vector<Point>>& points) const;
 
 	// Returns all the points that fall within a specified rectangle
-	std::vector<Point> query(Rectangle& rect,
-							 std::vector<Point>& points);
+	std::vector<Point> query(Rectangle& rect);
 
 private :
 

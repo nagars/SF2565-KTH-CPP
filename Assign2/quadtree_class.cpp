@@ -154,10 +154,11 @@ void Quadtree::subdivide() {
 	m_divided = true;
 }
 
-std::vector<Point> Quadtree::query(Rectangle& rect,
-							       std::vector<Point>& pointsInRect) {
+std::vector<Point> Quadtree::query(Rectangle& rect) {
 	// Searches the tree through paths with possible overlap
 	// Returns vector of points that fall within given rectangle
+
+	std::vector<Point> pointsInRect;
 
 	// check if I'm at a leaf node
 	if (!m_divided) {
@@ -173,8 +174,5 @@ std::vector<Point> Quadtree::query(Rectangle& rect,
 		}
 	}
 
-	// TODO does the caller need to pass pointsInRect or is it better to create
-	// the object in the method and return it to caller
 	return pointsInRect;
 }
-

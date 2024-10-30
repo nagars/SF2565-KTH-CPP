@@ -13,18 +13,24 @@
 #define BUCKETSIZE 64
 
 void writeRegionQueryMpl(Quadtree& quad,
-						 Rectangle& rect) {
+						 Rectangle& rect,
+						 std::vector<Point>& allPoints) {
 	// function implementing Task 4 of Assignment 2
 	
     // Collect the points falling within the specified boundary
-	std::vector<Point> points;
-    points = quad.query(rect, points);
+	std::vector<Point> pointsInRect;
+    pointsInRect = quad.query(rect);
+
+	// Create an MplWriter instance and specify the output filename
+	sf::MplWriter<Point, Rectangle> writer("plot_task4.py", 1.0);
 
 	// pipe all the points from the csv file to the mplWriter instance
+	writer << allPoints;
 	
-	// pipe the queried region to the mplWriter instance
+	// pipe the queried region and points to mplWriter
+	writer << rect;
+	writer << pointsInRect;
 
-	// pipe the result of the query method to the mplWriter instance
 };
 
 void writeFullTreeMpl(const Quadtree& quad) {
@@ -66,7 +72,7 @@ int main (){
 	Rectangle rect(bottom_left, top_right);
 	
 	// Plot the points in the rectangle just created
-	writeRegionQueryMpl(quad, rect);
+	writeRegionQueryMpl(quad, rect, pointCollection);
 
 	return 1;
 }
