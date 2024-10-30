@@ -23,13 +23,7 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr) {
 
-	//	// TODO: better error handling, try-catch block
-	//	if (pointCollection.empty()) {
-	//		std::cerr << "Error: Cannot build quadtree with no points.\n";
-	//		return;
-	//	}
-
-	// Initialise the variables with the largest possible values */
+	// Initialise the variables with the largest possible values
 	double minX = std::numeric_limits<double>::max();
 	double minY = std::numeric_limits<double>::max();
 	double maxX = std::numeric_limits<double>::lowest();
@@ -55,9 +49,11 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 	m_boundary = Rectangle(bottomLeft, topRight);
 
 	// Insert all points into the quadtree
-	for (const Point& p : pointCollection) {
-		insert(p);
-	}
+	// for (const Point& p : pointCollection) {
+	// 	insert(p);
+	// }
+	
+	insert(pointCollection);
 
 }
 
@@ -70,7 +66,15 @@ Quadtree::~Quadtree() {
 }
 
 // Insert a point
-bool Quadtree::insert(const Point &p) {
+// bool Quadtree::insert(const Point &p) {
+bool Quadtree::insert(const std::vector<Point> &pointCollection) {
+
+	if (pointCollection.size() > m_bucketSize) {
+		// split node
+		// for each point in pointCollection, check which of the children it belongs to
+		// split pointCollection into new pointCollections for the children
+		// call child->insert(splitPointCollection)
+	}
 
 	// Check if the point falls within the boundary of
 	// the current rectangle
@@ -104,12 +108,18 @@ bool Quadtree::insert(const Point &p) {
 // Traverse the tree, get the (boundary, points) pair for each node,
 // and return a vector of (boundary, points) pairs.
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
-	 			  std::vector<std::vector<Point>>& points) const {
+	 			            std::vector<std::vector<Point>>& points) const {
 	
 	// If this node is a leaf, collect its boundary and points
     if (!m_divided) {
 		boundaries.push_back(m_boundary);
-		points.push_back(m_points);
+		// points.push_back(m_points);
+		if (!m_points.empty()) {
+			points.push_back(m_points);
+		}
+		else {
+	        std::cout << "empty node! \n";
+		}
     }
 	// Recursively collect from subdivided quadrants if they exist
 	else {

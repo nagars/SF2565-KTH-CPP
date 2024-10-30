@@ -66,7 +66,7 @@ public :
 	~Quadtree();
 
 	// Insert a point in a unique quatrant
-	bool insert(const Point &p);
+	bool insert(const std::vector<Point>& pointCollection);
 
 	// For each node, collects the relevant boundary and points
 	// Returns a vector of (boundaries, points) tuples
