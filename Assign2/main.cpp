@@ -19,7 +19,7 @@ void writeRegionQueryMpl(Quadtree& quad,
 	
     // Collect the points falling within the specified boundary
 	std::vector<Point> pointsInRect;
-    pointsInRect = quad.query(rect);
+    quad.query(rect, pointsInRect);
 
 	// Create an MplWriter instance and specify the output filename
 	sf::MplWriter<Point, Rectangle> writer("plot_task4.py", 1.0);
@@ -68,7 +68,7 @@ int main (){
 
 	// Create a rectangle to test the QTree query method
 	Point bottom_left(5e+05, 6e+06);
-	Point top_right(7e+05, 9e+06);
+	Point top_right(7e+05, 7e+06);
 	Rectangle rect(bottom_left, top_right);
 	
 	// Plot the points in the rectangle just created

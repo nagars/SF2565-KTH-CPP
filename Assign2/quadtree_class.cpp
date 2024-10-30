@@ -154,25 +154,52 @@ void Quadtree::subdivide() {
 	m_divided = true;
 }
 
-std::vector<Point> Quadtree::query(Rectangle& rect) {
+void Quadtree::query(Rectangle& rect,
+								   std::vector<Point>& pointsInRect) {
 	// Searches the tree through paths with possible overlap
 	// Returns vector of points that fall within given rectangle
 
-	std::vector<Point> pointsInRect;
-
-	// check if I'm at a leaf node
-	if (!m_divided) {
-		// check if m_boundary overlaps with the specified rectangle. If so,
-		// loop through points in node, check if the point is in the boundary
-		// and add it
-		if (m_boundary.intersects(rect)) {
+	// std::vector<Point> pointsInRect;
+	
+	// check if query box intersects with Qtree boundary
+	if (m_boundary.intersects(rect)) {
+		// check if leafnode
+		if (!m_divided) {
+			// check if points are within boundary and if so, collect them
 			for (const auto& point : m_points) {
 				if (rect.check_point_within_rect(point)) {
 					pointsInRect.push_back(point);
 				}
-    		}
+			}
 		}
+		// if not a leaf node, call query on the children
+		else {
+			m_northWest->query(rect, pointsInRect);
+			m_northEast->query(rect, pointsInRect);
+			m_southWest->query(rect, pointsInRect);
+			m_southEast->query(rect, pointsInRect);
+		}
+		 
 	}
+		// if not on leaf, then call query on the children recursively
 
-	return pointsInRect;
+	
+			
+
+	// 	// if no 
+
+	// // check if I'm at a leaf node
+	// if (!m_divided) {
+	// 	// check if m_boundary overlaps with the specified rectangle. If so,
+	// 	// loop through points in node, check if the point is in the boundary
+	// 	// and add it
+	// 	if (m_boundary.intersects(rect)) {
+	// 		for (const auto& point : m_points) {
+	// 			if (rect.check_point_within_rect(point)) {
+	// 				pointsInRect.push_back(point);
+	// 			}
+    // 		}
+	// 	}
+	// 	return pointsInRect;
+	// }
 }
