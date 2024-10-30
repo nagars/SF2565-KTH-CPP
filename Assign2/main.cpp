@@ -63,8 +63,8 @@ int main (){
 	// Instantiate a quadtree based on points
 	Quadtree quad(pointCollection, BUCKETSIZE);
 	
-	// Generate an Mpl script to visualize the entire tree
-	writeFullTreeMpl(quad);
+	// // Generate an Mpl script to visualize the entire tree
+	// writeFullTreeMpl(quad);
 
 	// Create a rectangle to test the QTree query method
 	Point bottom_left(5e+05, 6e+06);
