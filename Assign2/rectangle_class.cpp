@@ -27,6 +27,13 @@ bool Rectangle::check_point_within_rect (Point p){
 	return 0;
 }
 
-bool Rectangle::intersects (Rectangle rhs){
+bool Rectangle::intersects (Rectangle rect){
 
+	bool noHorizontalIntersect = (rect.topRight.x < bottomLeft.x
+								|| rect.bottomLeft.x > topRight.x);
+	bool noVerticalIntersect = (rect.topRight.y < bottomLeft.y
+							  || rect.bottomLeft.y > topRight.y);
+	bool noIntersect = (noHorizontalIntersect && noVerticalIntersect);
+
+	return (!noIntersect);
 }

@@ -8,6 +8,7 @@
 #include <iostream>
 #include "class_definitions.hpp"
 
+// Constructor for empty quadtree of specified boundary
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 : m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
@@ -15,7 +16,8 @@ Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 
 }
 
-// Constructor automatically calculating boundary
+// Constructor for specified points collection, automatically calculating the 
+// smallest quatree boundary that contains all the given points
 Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize)
 : m_bucketSize(bucketSize), m_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
@@ -104,20 +106,18 @@ bool Quadtree::insert(const Point &p) {
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
 	 			  std::vector<std::vector<Point>>& points) const {
 	
-	// Collect this node's boundary and point
-	
-	// Recursively collect from subdivided quadrants if they exist
+	// If this node is a leaf, collect its boundary and points
     if (!m_divided) {
 		boundaries.push_back(m_boundary);
 		points.push_back(m_points);
     }
+	// Recursively collect from subdivided quadrants if they exist
 	else {
         m_northWest->collectNodes(boundaries, points);
         m_northEast->collectNodes(boundaries, points);
         m_southWest->collectNodes(boundaries, points);
         m_southEast->collectNodes(boundaries, points);
 	}
-
 }
 
 // Subdivide the current node
@@ -154,12 +154,27 @@ void Quadtree::subdivide() {
 	m_divided = true;
 }
 
-std::vector<Point> Quadtree::query(Rectangle rect) {
-	// query logic - assignment task #4;
-	// recursively searches the tree through paths with possible overlap
-	// at leaf: loops over all points in leaf, checking overlap with given
-	//          rectangle.
-	// returns vector of points that fall within given
-	return m_points;
+std::vector<Point> Quadtree::query(Rectangle& rect,
+							       std::vector<Point>& pointsInRect) {
+	// Searches the tree through paths with possible overlap
+	// Returns vector of points that fall within given rectangle
+
+	// check if I'm at a leaf node
+	if (!m_divided) {
+		// check if m_boundary overlaps with the specified rectangle. If so,
+		// loop through points in node, check if the point is in the boundary
+		// and add it
+		if (m_boundary.intersects(rect)) {
+			for (const auto& point : m_points) {
+				if (rect.check_point_within_rect(point)) {
+					pointsInRect.push_back(point);
+				}
+    		}
+		}
+	}
+
+	// TODO does the caller need to pass pointsInRect or is it better to create
+	// the object in the method and return it to caller
+	return pointsInRect;
 }
 

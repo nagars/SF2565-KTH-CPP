@@ -10,24 +10,25 @@
 #include "utilities_v3/random_points.hpp"
 #include "utilities_v3/mpl_writer.hpp"
 
-#define BUCKETSIZE 5
+#define BUCKETSIZE 64
 
-int main (){
+void writeRegionQueryMpl(Quadtree& quad,
+						 Rectangle& rect) {
+	// function implementing Task 4 of Assignment 2
+	
+    // Collect the points falling within the specified boundary
+	std::vector<Point> points;
+    points = quad.query(rect, points);
 
-	// // Load vector of points from csv file
-	// std::vector<Point> pointCollection = sf::readCsvPoints<Point>("test_data/swe.csv");
+	// pipe all the points from the csv file to the mplWriter instance
+	
+	// pipe the queried region to the mplWriter instance
 
-	// Instantiate a random point generator
-	sf::RandomPointGenerator<Point> generator{ 1 };
+	// pipe the result of the query method to the mplWriter instance
+};
 
-	// Generate random points
-	generator.addUniformPoints(40);
-
-	// Get the generated points
-	std::vector<Point> pointCollection = generator.takePoints();
-
-	// Instantiate a quadtree based on points
-	Quadtree quad(pointCollection, BUCKETSIZE);
+void writeFullTreeMpl(const Quadtree& quad) {
+	// function plotting 
 	
 	// Collect all node boundaries and points
     std::vector<Rectangle> boundaries;
@@ -35,7 +36,7 @@ int main (){
     quad.collectNodes(boundaries, points);
 
 	// Create an MplWriter instance and specify the output filename
-	sf::MplWriter<Point, Rectangle> writer("plot.py", 10.0);
+	sf::MplWriter<Point, Rectangle> writer("plot_task2.py", 1.0);
 
     // Write boundaries and points to the writer for visualization
     for (const auto& boundary : boundaries) {
@@ -44,6 +45,28 @@ int main (){
     for (const auto& pointSet : points) {
         writer << pointSet;
     }
+
+};
+
+
+int main (){
+
+	// Load vector of points from csv file
+	std::vector<Point> pointCollection = sf::readCsvPoints<Point>("test_data/swe.csv");
+
+	// Instantiate a quadtree based on points
+	Quadtree quad(pointCollection, BUCKETSIZE);
+	
+	// Generate an Mpl script to visualize the entire tree
+	writeFullTreeMpl(quad);
+
+	// Create a rectangle to test the QTree query method
+	Point bottom_left(5e+05, 6e+06);
+	Point top_right(7e+05, 9e+06);
+	Rectangle rect(bottom_left, top_right);
+	
+	// Plot the points in the rectangle just created
+	writeRegionQueryMpl(quad, rect);
 
 	return 1;
 }
