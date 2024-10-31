@@ -22,12 +22,6 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr) {
 
-	//	// TODO: better error handling, try-catch block
-	//	if (pointCollection.empty()) {
-	//		std::cerr << "Error: Cannot build quadtree with no points.\n";
-	//		return;
-	//	}
-
 	// Initialise the variables with the largest possible values */
 	double minX = std::numeric_limits<double>::max();
 	double minY = std::numeric_limits<double>::max();
@@ -59,6 +53,7 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 		m_points.push_back(p);
 	}
 
+	// Recursively build tree
 	build_tree();
 
 }
@@ -69,6 +64,7 @@ Quadtree::~Quadtree() {
 
 }
 
+// Recursively build the tree
 void Quadtree::build_tree(void){
 
 	// Check if points to be allotted exceed
@@ -105,39 +101,6 @@ void Quadtree::build_tree(void){
 
 }
 
-//// Insert a point
-//bool Quadtree::insert(const Point &p) {
-//
-//	// Check if the point falls within the boundary of
-//	// the current rectangle
-//	// Return false if not inside
-//	if (false == m_boundary.check_point_within_rect(p)) {
-//		return false;
-//	}
-//
-//	// Check if max capacity of the rectangle is exceeded
-//	if (m_points.size() < m_bucketSize) {
-//		m_points.push_back(p);
-//		return true;
-//	}
-//
-//	// If point falls inside current node but exceeds max number
-//	// of points allowed, divide node further
-//	if (!m_divided) {
-//		subdivide();
-//	}
-//
-//	// Insert point into newly generated quadrants
-//	// Recursively continue until successful
-//	if (m_northWest->insert(p)) return true;
-//	if (m_northEast->insert(p)) return true;
-//	if (m_southWest->insert(p)) return true;
-//	if (m_southEast->insert(p)) return true;
-//
-//	return false;
-//
-//}
-
 // Traverse the tree, get the (boundary, points) pair for each node,
 // and return a vector of (boundary, points) pairs.
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
@@ -156,10 +119,9 @@ void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
 	m_southWest->collectNodes(boundaries, points);
 	m_southEast->collectNodes(boundaries, points);
 
-
 }
 
-// Subdivide the current node
+// Subdivide the current node into 4 quadrants
 void Quadtree::subdivide() {
 
 	// Find midpoint of current rectangle boundary
@@ -193,6 +155,7 @@ void Quadtree::subdivide() {
 	m_node_divided = true;
 }
 
+// Used to return all points within a given boundary provided
 void Quadtree::query(Rectangle& rect, std::vector<Point>& pointsInRect) {
 
 	// check if query box intersects with Quadtree boundary

@@ -85,7 +85,7 @@ private :
 	unsigned long m_bucketSize;      // max. No of points per node allowed
 	Rectangle m_boundary;            // boundary of node
 	std::vector<Point> m_points;     // points in node
-	bool m_node_divided;             // Flag to track if rectangle has children
+	bool m_node_divided = false;     // Flag to track if rectangle has children
 
 	// Child quadtrees
 	std::unique_ptr<Quadtree> m_northWest;
