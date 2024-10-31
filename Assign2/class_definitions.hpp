@@ -40,7 +40,7 @@ public:
 	Rectangle(const Point bottomLeft, const Point topRight);
 
 	// Checks if a particular point is within the rectangle
-	bool check_point_within_rect (Point p);
+	bool containsPoint(Point p);
 
 	// Check if another rectangle intersects with this rectangle
 	bool intersects (Rectangle rhs);
@@ -65,8 +65,8 @@ public :
 	// Destructor
 	~Quadtree();
 
-	// Insert a point in a unique quatrant
-	bool insert(const std::vector<Point>& pointCollection);
+	// // Insert a point in a unique quatrant
+	// bool insert(const std::vector<Point>& pointCollection);
 
 	// For each node, collects the relevant boundary and points
 	// Returns a vector of (boundaries, points) tuples
@@ -76,21 +76,29 @@ public :
 	// Returns all the points that fall within a specified rectangle
 	void query(Rectangle& rect, std::vector<Point>& pointsInRect);
 
-private :
-
-	// Subdivide the current node into 4 quadtrants
-	void subdivide();
-
-	unsigned long m_bucketSize;      // max. No of points per node allowed
+	// recursively create tree structure and load points in leaves
+	void growTree();
+	
 	Rectangle m_boundary;            // boundary of node
 	std::vector<Point> m_points;     // points in node
-	bool m_divided;                  // Flag to track if rectangle has children
+
+private :
+
+	// Subdivide the current node into 4 quadrants
+	void subdivide();
+
+	// Loads all the input points, creating the tree structure
+	void seedTree(std::vector<Point>& pointCollection);
+
+	unsigned long m_bucketSize;      // max. No of points per node allowed
+	bool m_isLeaf;                   // Flag to track if node is a leaf
 
 	// Child quadtrees
 	Quadtree* m_northWest;
 	Quadtree* m_northEast;
 	Quadtree* m_southWest;
 	Quadtree* m_southEast;
+	std::vector<Quadtree*> children;
 };
 
 

@@ -10,18 +10,20 @@
 
 // Constructor for empty quadtree of specified boundary
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
-: m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
+: m_bucketSize(bucketSize), m_boundary(boundary), m_isLeaf(true),
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr){
 
 }
 
+
 // Constructor for specified points collection, automatically calculating the 
 // smallest quatree boundary that contains all the given points
 Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize)
-: m_bucketSize(bucketSize), m_divided(false),
-  m_northWest(nullptr), m_northEast(nullptr),
-  m_southWest(nullptr), m_southEast(nullptr) {
+: m_bucketSize(bucketSize), m_isLeaf(true),
+//   m_northWest(nullptr), m_northEast(nullptr),
+//   m_southWest(nullptr), m_southEast(nullptr) {
+  children(4) {
 
 	// Initialise the variables with the largest possible values
 	double minX = std::numeric_limits<double>::max();
@@ -47,15 +49,10 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 
 	// Create rectangle object with above dimensions
 	m_boundary = Rectangle(bottomLeft, topRight);
-
-	// Insert all points into the quadtree
-	// for (const Point& p : pointCollection) {
-	// 	insert(p);
-	// }
 	
-	insert(pointCollection);
-
+	seedTree(pointCollection);
 }
+
 
 // Destructor
 Quadtree::~Quadtree() {
@@ -65,70 +62,53 @@ Quadtree::~Quadtree() {
 	delete m_southEast;
 }
 
-// Insert a point
-// bool Quadtree::insert(const Point &p) {
-bool Quadtree::insert(const std::vector<Point> &pointCollection) {
 
-	if (pointCollection.size() > m_bucketSize) {
-		// split node
-		// for each point in pointCollection, check which of the children it belongs to
-		// split pointCollection into new pointCollections for the children
-		// call child->insert(splitPointCollection)
-	}
-
-	// Check if the point falls within the boundary of
-	// the current rectangle
-	// Return false if not inside
-	if (false == m_boundary.check_point_within_rect(p)) {
-		return false;
-	}
-
-	// Check if max capacity of the rectangle is exceeded
-	if (m_points.size() < m_bucketSize) {
+// Loads all the input points in the root, then creates the tree
+void Quadtree::seedTree(std::vector<Point>& pointCollection) {
+	// load all data in root
+	for (auto const& p : pointCollection)
 		m_points.push_back(p);
-		return true;
-	}
-
-	// If point falls inside current node but exceeds max number
-	// of points allowed, divide node further
-	if (!m_divided) {
-		subdivide();
-	}
-
-	// Insert point into newly generated quadrants
-	// Recursively continue until successful
-	if (m_northWest->insert(p)) return true;
-	if (m_northEast->insert(p)) return true;
-	if (m_southWest->insert(p)) return true;
-	if (m_southEast->insert(p)) return true;
-
-	return false;
+	growTree();
 }
+
+
+// Recursively create tree structure and load points in leaves
+void Quadtree::growTree() {
+	if (m_points.size() > m_bucketSize) {
+		if (m_isLeaf)
+			subdivide();
+		for (auto const& p : m_points) {
+			for (auto const& c : children) {
+				if (c->m_boundary.containsPoint(p)) {
+					c->m_points.push_back(p);
+					break;
+				}
+			}
+		}
+		m_points.clear();
+		for (auto const& c : children)
+			c->growTree();
+	}
+}
+
 
 // Traverse the tree, get the (boundary, points) pair for each node,
 // and return a vector of (boundary, points) pairs.
 void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
-	 			            std::vector<std::vector<Point>>& points) const {
-	
+	 			            std::vector<std::vector<Point>>& points) const {	
 	// If this node is a leaf, collect its boundary and points
-    if (!m_divided) {
-		boundaries.push_back(m_boundary);
-		// points.push_back(m_points);
+    if (m_isLeaf) {
 		if (!m_points.empty()) {
+			boundaries.push_back(m_boundary);
 			points.push_back(m_points);
 		}
-		else {
-	        std::cout << "empty node! \n";
-		}
-    }
-	// Recursively collect from subdivided quadrants if they exist
-	else {
-        m_northWest->collectNodes(boundaries, points);
-        m_northEast->collectNodes(boundaries, points);
-        m_southWest->collectNodes(boundaries, points);
-        m_southEast->collectNodes(boundaries, points);
+    } else {
+		// Recursively collect from subdivided quadrants if they exist	
+		for (auto const& c : children)
+        	c->collectNodes(boundaries, points);
 	}
 }
+
 
 // Subdivide the current node
 void Quadtree::subdivide() {
@@ -159,57 +139,35 @@ void Quadtree::subdivide() {
 			Point(midX, m_boundary.bottomLeft.y),
 			Point(m_boundary.topRight.x, midY)),
 			m_bucketSize);
+	
+	// Populate the children vector with the pointers
+    children = { m_northWest, m_northEast, m_southWest, m_southEast };
 
 	// Set flag that quad has been divided
-	m_divided = true;
+	m_isLeaf = false;
 }
 
+// Returns all the points within a specified region
 void Quadtree::query(Rectangle& rect,
-								   std::vector<Point>& pointsInRect) {
+					 std::vector<Point>& pointsInRect) {
 	// Searches the tree through paths with possible overlap
 	// Returns vector of points that fall within given rectangle
-
-	// std::vector<Point> pointsInRect;
 	
 	// check if query box intersects with Qtree boundary
 	if (m_boundary.intersects(rect)) {
 		// check if leafnode
-		if (!m_divided) {
-			// check if points are within boundary and if so, collect them
-			for (const auto& point : m_points) {
-				if (rect.check_point_within_rect(point)) {
-					pointsInRect.push_back(point);
+		if (m_isLeaf) {
+			// check if a point of this leaf is inside the query box
+			// if so, collect it
+			for (const auto& p : m_points) {
+				if (rect.containsPoint(p)) {
+					pointsInRect.push_back(p);
 				}
 			}
-		}
 		// if not a leaf node, call query on the children
-		else {
-			m_northWest->query(rect, pointsInRect);
-			m_northEast->query(rect, pointsInRect);
-			m_southWest->query(rect, pointsInRect);
-			m_southEast->query(rect, pointsInRect);
-		}
-		 
+		} else {
+			for (auto const& c : children)
+				c->query(rect, pointsInRect);
+		}		 
 	}
-		// if not on leaf, then call query on the children recursively
-
-	
-			
-
-	// 	// if no 
-
-	// // check if I'm at a leaf node
-	// if (!m_divided) {
-	// 	// check if m_boundary overlaps with the specified rectangle. If so,
-	// 	// loop through points in node, check if the point is in the boundary
-	// 	// and add it
-	// 	if (m_boundary.intersects(rect)) {
-	// 		for (const auto& point : m_points) {
-	// 			if (rect.check_point_within_rect(point)) {
-	// 				pointsInRect.push_back(point);
-	// 			}
-    // 		}
-	// 	}
-	// 	return pointsInRect;
-	// }
 }

@@ -18,7 +18,7 @@ Rectangle::Rectangle(const Point bottomLeft, const Point topRight):
 }
 
 
-bool Rectangle::check_point_within_rect (Point p){
+bool Rectangle::containsPoint(Point p){
 
 	if ((p.x >= bottomLeft.x && p.y >= bottomLeft.y) &&
 			((p.x <= topRight.x && p.y <= topRight.y))){
