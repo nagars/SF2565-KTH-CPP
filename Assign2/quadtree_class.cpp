@@ -2,14 +2,15 @@
  * quadtree_class.cpp
  *
  *  Created on: Oct 18, 2024
- *      Author: Alessio Bacchiocchi
+ *      Author: Shawn, Alessio Bacchiocchi
  */
 
 #include <iostream>
 #include "class_definitions.hpp"
 
+
 Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
-: m_bucketSize(bucketSize), m_boundary(boundary), m_divided(false),
+: m_bucketSize(bucketSize), m_boundary(boundary), m_node_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr){
 
@@ -17,7 +18,7 @@ Quadtree::Quadtree(const Rectangle& boundary, unsigned long bucketSize)
 
 // Constructor automatically calculating boundary
 Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize)
-: m_bucketSize(bucketSize), m_divided(false),
+: m_bucketSize(bucketSize), m_node_divided(false),
   m_northWest(nullptr), m_northEast(nullptr),
   m_southWest(nullptr), m_southEast(nullptr) {
 
@@ -54,8 +55,11 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 
 	// Insert all points into the quadtree
 	for (const Point& p : pointCollection) {
-		insert(p);
+		//insert(p);
+		m_points.push_back(p);
 	}
+
+	build_tree();
 
 }
 
@@ -63,51 +67,76 @@ Quadtree::Quadtree(std::vector<Point>& pointCollection, unsigned long bucketSize
 // Destructor
 Quadtree::~Quadtree() {
 
-	//	// Visualise boundary of node
-	//	writer << m_boundary;
-	//
-	//	// Check if leaf node. Only write
-	//	// points in leaf nodes
-	//	if(!m_divided){
-	//		// Visualise points in this node
-	//		if(!m_points.empty()){
-	//			writer << m_points;
-	//		}
-	//	}
+}
+
+void Quadtree::build_tree(void){
+
+	// Check if points to be allotted exceed
+	// max size of current node
+	if (m_points.size() > m_bucketSize) {
+		// If node is a leaf, divide it
+		if (!m_node_divided)
+			subdivide();
+
+		// Allot points in created children
+		for (auto const& p : m_points) {
+
+			if (m_northWest->m_boundary.check_point_within_rect(p)){
+				m_northWest->m_points.push_back(p);
+			} else if (m_northEast->m_boundary.check_point_within_rect(p)){
+				m_northEast->m_points.push_back(p);
+			} else if (m_southWest->m_boundary.check_point_within_rect(p)){
+				m_southWest->m_points.push_back(p);
+			} else if (m_southEast->m_boundary.check_point_within_rect(p)){
+				m_southEast->m_points.push_back(p);
+			}
+		}
+
+		// Clear points from current node
+		m_points.clear();
+
+		// Continue to build the tree from each node
+		m_northWest->build_tree();
+		m_northEast->build_tree();
+		m_southWest->build_tree();
+		m_southEast->build_tree();
+
+	}
 
 }
 
-// Insert a point
-bool Quadtree::insert(const Point &p) {
-
-	// Check if the point falls within the boundary of
-	// the current rectangle
-	// Return false if not inside
-	if (false == m_boundary.check_point_within_rect(p)) {
-		return false;
-	}
-
-	// Check if max capacity of the rectangle is exceeded
-	if (m_points.size() < m_bucketSize) {
-		m_points.push_back(p);
-		return true;
-	}
-
-	// If point falls inside current node but exceeds max number
-	// of points allowed, divide node further
-	if (!m_divided) {
-		subdivide();
-	}
-
-	// Insert point into newly generated quadrants
-	// Recursively continue until successful
-	if (m_northWest->insert(p)) return true;
-	if (m_northEast->insert(p)) return true;
-	if (m_southWest->insert(p)) return true;
-	if (m_southEast->insert(p)) return true;
-
-	return false;
-}
+//// Insert a point
+//bool Quadtree::insert(const Point &p) {
+//
+//	// Check if the point falls within the boundary of
+//	// the current rectangle
+//	// Return false if not inside
+//	if (false == m_boundary.check_point_within_rect(p)) {
+//		return false;
+//	}
+//
+//	// Check if max capacity of the rectangle is exceeded
+//	if (m_points.size() < m_bucketSize) {
+//		m_points.push_back(p);
+//		return true;
+//	}
+//
+//	// If point falls inside current node but exceeds max number
+//	// of points allowed, divide node further
+//	if (!m_divided) {
+//		subdivide();
+//	}
+//
+//	// Insert point into newly generated quadrants
+//	// Recursively continue until successful
+//	if (m_northWest->insert(p)) return true;
+//	if (m_northEast->insert(p)) return true;
+//	if (m_southWest->insert(p)) return true;
+//	if (m_southEast->insert(p)) return true;
+//
+//	return false;
+//
+//}
 
 // Traverse the tree, get the (boundary, points) pair for each node,
 // and return a vector of (boundary, points) pairs.
@@ -115,7 +144,7 @@ void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
 		std::vector<std::vector<Point>>& points) const {
 
 	// Collect leaf node's boundary and points
-	if (!m_divided) {
+	if (!m_node_divided) {
 		boundaries.push_back(m_boundary);
 		points.push_back(m_points);
 		return;
@@ -161,15 +190,30 @@ void Quadtree::subdivide() {
 			m_bucketSize);
 
 	// Set flag that quad has been divided
-	m_divided = true;
+	m_node_divided = true;
 }
 
-std::vector<Point> Quadtree::query(Rectangle rect) {
-	// query logic - assignment task #4;
-	// recursively searches the tree through paths with possible overlap
-	// at leaf: loops over all points in leaf, checking overlap with given
-	//          rectangle.
-	// returns vector of points that fall within given
-	return m_points;
+void Quadtree::query(Rectangle& rect, std::vector<Point>& pointsInRect) {
+
+	// check if query box intersects with Quadtree boundary
+	if (m_boundary.overlaps(rect)) {
+		// check if leafnode
+		if (!m_node_divided) {
+			// check if points are within boundary and if so, collect them
+			for (const auto& point : m_points) {
+				if (rect.check_point_within_rect(point)) {
+					pointsInRect.push_back(point);
+				}
+			}
+		}
+		// if not a leaf node, call query on the children
+		else {
+			m_northWest->query(rect, pointsInRect);
+			m_northEast->query(rect, pointsInRect);
+			m_southWest->query(rect, pointsInRect);
+			m_southEast->query(rect, pointsInRect);
+		}
+
+	}
 }
 

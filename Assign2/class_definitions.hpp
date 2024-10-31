@@ -2,7 +2,7 @@
  * class_definitions.h
  *
  *  Created on: Oct 18, 2024
- *      Author: root
+ *      Author: Shawn, Alessio
  */
 
 #ifndef CLASS_DEFINITIONS_HPP_
@@ -43,8 +43,8 @@ public:
 	// Checks if a particular point is within the rectangle
 	bool check_point_within_rect (Point p);
 
-	// Check if another rectangle intersects with this rectangle
-	bool intersects (Rectangle rhs);
+	// Check if another rectangle overlaps with this rectangle
+	bool overlaps (Rectangle rhs);
 
 	// Rectangle boundaries
 	Point bottomLeft, topRight;
@@ -66,8 +66,8 @@ public :
 	// Destructor
 	~Quadtree();
 
-	// Insert a point in a unique quatrant
-	bool insert(const Point &p);
+	// Recursively build the quadtree
+	void build_tree(void);
 
 	// For each node, collects the relevant boundary and points
 	// Returns a vector of (boundaries, points) tuples
@@ -75,7 +75,7 @@ public :
 	 				  std::vector<std::vector<Point>>& points) const;
 
 	// Returns all the points that fall within a specified rectangle
-	std::vector<Point> query(Rectangle rect);
+	void query(Rectangle& rect, std::vector<Point>& pointsInRect);
 
 private :
 
@@ -85,7 +85,7 @@ private :
 	unsigned long m_bucketSize;      // max. No of points per node allowed
 	Rectangle m_boundary;            // boundary of node
 	std::vector<Point> m_points;     // points in node
-	bool m_divided;                  // Flag to track if rectangle has children
+	bool m_node_divided;             // Flag to track if rectangle has children
 
 	// Child quadtrees
 	std::unique_ptr<Quadtree> m_northWest;
