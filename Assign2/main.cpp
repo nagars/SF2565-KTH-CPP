@@ -12,10 +12,10 @@
 
 #define BUCKETSIZE 5
 
+// function implementing Task 4 of Assignment 2
 void plotRegionQuery(Quadtree& quad,
-						 Rectangle& rect,
-						 std::vector<Point>& allPoints) {
-	// function implementing Task 4 of Assignment 2
+					 Rectangle& rect,
+					 std::vector<Point>& allPoints) {
 	
     // Collect the points falling within the specified boundary
 	std::vector<Point> pointsInRect;
@@ -32,6 +32,33 @@ void plotRegionQuery(Quadtree& quad,
 	writer << pointsInRect;
 
 };
+
+// function testing the query method (Task 4 of assignment 2)
+void testQuery(Quadtree& quad,
+			   const std::vector<Point>& generatedPoints) {
+	// Create a rectangle to test the query method
+	Point bottom_left(-0.5, -0.5);
+	Point top_right(0.5, 0.5);
+	Rectangle rect(bottom_left, top_right);
+
+	// Create a vector to hold the query results
+	std::vector<Point> queryResult;
+
+	// Query the quadtree
+	quad.query(rect, queryResult);
+	
+	// Create an MplWriter instance and specify the output filename
+	sf::MplWriter<Point, Rectangle> writer("plot_query_test.py", 5.0);
+
+	// Plot the full set of points used to create the quadtree
+	writer << generatedPoints;
+	
+	// Plot the query rectangle
+	writer << rect;
+
+	// Plot the query results
+	writer << queryResult;
+}
 
 void plotFullTree(const Quadtree& quad) {
 	// function plotting 
@@ -64,7 +91,7 @@ int main (){
 	sf::RandomPointGenerator<Point> generator{ 2 };
 
 	// Generate random points
-	generator.addNormalPoints(400);
+	generator.addNormalPoints(20);
 
 	// Get the generated points
 	std::vector<Point> generatedPoints = generator.takePoints();
@@ -72,42 +99,10 @@ int main (){
 	// Instantiate a quadtree based on points
 	Quadtree quad(generatedPoints, BUCKETSIZE);
 	
-	// Generate an Mpl script to visualize the entire tree
-	plotFullTree(quad);
+	// // Generate an Mpl script to visualize the entire tree
+	// plotFullTree(quad);
 
-	// // Create a rectangle to test the QTree query method
-	// Point bottom_left(-0.5, -0.5);
-	// Point top_right(0.5, 0.5);
-	// Rectangle rect(bottom_left, top_right);
-	
-	// // Plot the points in the rectangle just created
-	// plotRegionQuery(quad, rect, pointCollection);
-		
-	// // Collect all node boundaries and points
-    // std::vector<Rectangle> boundaries;
-    // std::vector<std::vector<Point>> pointsEachNode;
-    // quad.collectNodes(boundaries, pointsEachNode);
-	
-	// // Create an MplWriter instance and specify the output filename
-	// sf::MplWriter<Point, Rectangle> writer("plot_query_test.py", 5.0);
-
-	// // Pass boundaries and points to the writer for visualization
-    // for (const auto& boundary : boundaries) {
-    //     writer << boundary;
-    // }
-    // for (const auto& pointSet : pointsEachNode) {
-    //    writer << pointSet;
-    // }
-
-	// writer << pointCollection;
-
-	// writer << rect;
-
-	// // Collect the points falling within the specified boundary
-	// std::vector<Point> pointsInRect;
-    // quad.query(rect, pointsInRect);
-
-	// writer << pointsInRect;
+	testQuery(quad, generatedPoints);
 
 	return 1;
 }
