@@ -10,7 +10,7 @@
 #include "utilities_v3/random_points.hpp"
 #include "utilities_v3/mpl_writer.hpp"
 
-#define BUCKETSIZE 2
+#define BUCKETSIZE 5
 
 void plotRegionQuery(Quadtree& quad,
 						 Rectangle& rect,
@@ -64,7 +64,7 @@ int main (){
 	sf::RandomPointGenerator<Point> generator{ 2 };
 
 	// Generate random points
-	generator.addUniformPoints(20);
+	generator.addNormalPoints(400);
 
 	// Get the generated points
 	std::vector<Point> generatedPoints = generator.takePoints();

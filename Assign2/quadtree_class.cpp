@@ -98,10 +98,11 @@ void Quadtree::collectNodes(std::vector<Rectangle>& boundaries,
 	 			            std::vector<std::vector<Point>>& points) const {	
 	// If this node is a leaf, collect its boundary and points
     if (m_isLeaf) {
-		if (!m_points.empty()) {
-			boundaries.push_back(m_boundary);
-			points.push_back(m_points);
-		}
+		// if (!m_points.empty()) {
+		// 	boundaries.push_back(m_boundary);
+		// 	points.push_back(m_points);
+		boundaries.push_back(m_boundary);
+		points.push_back(m_points);
     } else {
 		// Recursively collect from subdivided quadrants if they exist	
 		for (auto const& c : children)
