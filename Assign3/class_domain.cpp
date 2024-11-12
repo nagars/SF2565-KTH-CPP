@@ -7,6 +7,13 @@
 
 #include "class_def.hpp"
 
-Domain::Domain(void){
+Domain::Domain(Point bottomLeft, Point bottomRight,
+		Point topLeft, Point topRight){
+
+	// Create boundaries
+	top = std::make_unique<StraightLine> (topLeft, topRight);
+	left = std::make_unique<StraightLine> (bottomLeft, topLeft);
+	right = std::make_unique<StraightLine> (bottomRight, topRight);
+	bottom = std::make_unique<StraightLine> (bottomLeft, bottomRight);
 
 }

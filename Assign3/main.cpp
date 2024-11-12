@@ -7,11 +7,18 @@
 #include "class_def.hpp"
 
 // (y,x)  coordinates
-#define topLeft (5,0)
-#define topRight (5,3)
-#define bottomLeft (-10,0)
-#define bottomRight (-10, 3)
+#define TOPLEFT 0,5
+#define TOPRIGHT 3,5
+#define BOTTOMLEFT 0,-10
+#define BOTTOMRIGHT 3,-10
 
 int main(){
+
+	Point topLeft(TOPLEFT);
+	Point topRight(TOPRIGHT);
+	Point bottomLeft(BOTTOMLEFT);
+	Point bottomRight(BOTTOMRIGHT);
+	Domain grid(bottomLeft, bottomRight, topLeft, topRight);
+
 	return 1;
 }
