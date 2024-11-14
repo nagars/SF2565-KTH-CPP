@@ -12,6 +12,9 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <limits>
+
+#define EPSILON std::numeric_limits<double>::epsilon()
 
 // Holds an x,y point
 class Point {
@@ -46,19 +49,19 @@ public:
 
 	// t = {0,1}. t = 0 -> pointStart. t = 1 -> pointEnd
 	Point at(double t) const override {
+		// Ensure points are not the same
+		assert(fabs(pointEnd.x - pointStart.x) < EPSILON);
+		assert(fabs(pointEnd.y - pointStart.y) < EPSILON);
+
 		double pointOfInterest = pointStart.x + t*(pointEnd.x - pointStart.x);
 		Point p_toGet(pointOfInterest,0);	// Init y point as 0 for now
-		// Calculate slope used for interpolation
-		assert(pointEnd.x - pointStart.x == 0);		// Check for divide by 0
-		slope = (pointEnd.y - pointStart.y)/(pointEnd.x - pointStart.x);
-		p_toGet.y = pointStart.y + slope * (p_toGet.x - pointStart.x);
+		p_toGet.y = pointStart.y + t*(pointEnd.x - pointStart.x);
 		return p_toGet;
 	};
 
 private:
 	Point pointStart;		// Start of line
 	Point pointEnd;			// End of line
-	double slope;			// Calculated slope of line
 };
 
 // Used to represent the grid
