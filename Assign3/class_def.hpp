@@ -14,6 +14,9 @@
 #include <cassert>
 #include <limits>
 
+#include "Eigen/Eigen"
+
+
 #define EPSILON std::numeric_limits<double>::epsilon()
 
 // Holds an x,y point
@@ -59,7 +62,6 @@ public:
 		return p_toGet;
 	};
 
-private:
 	Point pointStart;		// Start of line
 	Point pointEnd;			// End of line
 };
@@ -69,6 +71,13 @@ class Domain {
 public:
 	Domain(Point bottomLeft, Point bottomRight,
 			Point topLeft, Point topRight);
+
+	// Generates matrix of x,y in physical domain
+	Eigen::MatrixXd Gen_Matrix(int num_division);
+
+	// Generates an x,y pair based on xi and eta using tfi
+	std::pair<double, double> TFI(double xi, double eta);
+
 private:
 	std::unique_ptr <StraightLine> top;
 	std::unique_ptr <StraightLine> bottom;
@@ -76,5 +85,6 @@ private:
 	std::unique_ptr <StraightLine> right;
 protected:
 };
+
 
 #endif /* CLASS_DEF_HPP_ */

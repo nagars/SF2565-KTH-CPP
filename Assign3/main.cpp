@@ -17,6 +17,8 @@
 #define BOTTOMLEFT 0,-10
 #define BOTTOMRIGHT 3,-10
 
+
+
 int main(){
 
 	Point topLeft(TOPLEFT);

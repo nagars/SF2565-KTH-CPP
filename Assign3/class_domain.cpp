@@ -17,3 +17,30 @@ Domain::Domain(Point bottomLeft, Point bottomRight,
 	bottom = std::make_unique<StraightLine> (bottomLeft, bottomRight);
 
 }
+
+// We iterate through and generate a grid of xi and eta values
+// and use TFI on that to generate a grid of x,y values in the physical domain
+Eigen::MatrixXd Domain::Gen_Grid(int num_division){
+
+	double h = 1/num_division; //Grid point spacing
+
+	Eigen::MatrixXd grid(num_division, num_division);
+
+	// Iterate through each possible xi and eta values
+	// based on number of divisions and spacing between points
+	// of the parame
+	for (int i = 0; i <= num_division; ++i) {
+		for (int j = 0; j <= num_division; ++j) {
+			double xi = i * h;
+			double eta = j * h;
+			grid[i][j] = (*this)(xi, eta); // Interpolate the point using operator()
+		}
+	}
+	return grid;
+
+}
+
+
+std::pair<double, double> TFI(double xi, double eta){
+
+}
