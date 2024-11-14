@@ -64,6 +64,27 @@ private:
 	Point pointEnd;			// End of line
 };
 
+// Any boundary that is not a straight line
+class EquationCurve : public Curve {	
+	public:
+		virtual ~EquationCurve() = default; 
+		Point at(double t) const override;
+	private:
+		virtual Point gamma(double t) const = 0; 
+		virtual Point gammaprime(double t) const = 0;
+};
+
+// A concrete implementation of the curved bottom boundary
+class BottomCurve : public EquationCurve {
+	public:
+		// constructor (empty)
+		// destructor (is it needed?)
+		// 'at' method
+	private:
+		// gamma hardcode the f(x) in the assignment with if/else for branching
+		// gammaprime - do it analitically first
+};
+
 // Used to represent the grid
 class Domain {
 public:
