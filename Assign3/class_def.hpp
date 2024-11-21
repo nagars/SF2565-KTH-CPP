@@ -52,9 +52,9 @@ public:
 
 	// t = {0,1}. t = 0 -> pointStart. t = 1 -> pointEnd
 	Point at(double t) const override {
-		// Ensure points are not the same
-		assert(fabs(pointEnd.x - pointStart.x) < EPSILON);
-		assert(fabs(pointEnd.y - pointStart.y) < EPSILON);
+		// // Ensure points are not the same
+		// assert(fabs(pointEnd.x - pointStart.x) < EPSILON);
+		// assert(fabs(pointEnd.y - pointStart.y) < EPSILON);
 
 		double pointOfInterest = pointStart.x + t*(pointEnd.x - pointStart.x);
 		Point p_toGet(pointOfInterest,0);	// Init y point as 0 for now

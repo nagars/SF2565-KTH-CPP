@@ -31,10 +31,10 @@ int main(){
 	Point topRight(TOPRIGHT);
 	Point bottomLeft(BOTTOMLEFT);
 	Point bottomRight(BOTTOMRIGHT);
-	std::unique_ptr<Curve> bottom = std::make_unique<StraightLine>(bottomLeft, bottomRight);
-	std::unique_ptr<Curve> top = std::make_unique<StraightLine>(topLeft, topRight);
-	std::unique_ptr<Curve> left = std::make_unique<StraightLine>(bottomLeft, topLeft);
-	std::unique_ptr<Curve> right = std::make_unique<StraightLine>(bottomRight, topRight);
+	std::unique_ptr<StraightLine> bottom = std::make_unique<StraightLine>(bottomLeft, bottomRight);
+	std::unique_ptr<StraightLine> top = std::make_unique<StraightLine>(topLeft, topRight);
+	std::unique_ptr<StraightLine> left = std::make_unique<StraightLine>(bottomLeft, topLeft);
+	std::unique_ptr<StraightLine> right = std::make_unique<StraightLine>(topRight, bottomRight);
 
 	Domain linearDomain(std::move(bottom), std::move(top),
 						std::move(left), std::move(right),
