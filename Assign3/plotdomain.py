@@ -37,8 +37,10 @@ def plotDomain(xPath, yPath, ax=None, pointsize=0.1, linewidth=0.4):
     
     return ax
 
-xPath = 'PATH_TO_YOUR_X_FILE_HERE'
-yPath = 'PATH_TO_YOUR_Y_FILE_HERE'
+#xPath = 'PATH_TO_YOUR_X_FILE_HERE'
+#yPath = 'PATH_TO_YOUR_Y_FILE_HERE'
+xPath = '/home/user/github/SF2565/Assign3/xdata'
+yPath = '/home/user/github/SF2565/Assign3/ydata'
 
 ax = plotDomain(xPath, yPath)
 
