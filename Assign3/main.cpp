@@ -13,10 +13,10 @@
 // #define GRID_POINT_SPACING	1/NUM_DIVISIONS
 
 // (y,x)  coordinates
-#define TOPLEFT 0,5
-#define TOPRIGHT 3,5
-#define BOTTOMLEFT 0,-10
-#define BOTTOMRIGHT 3,-10
+#define TOPLEFT -10, 3
+#define TOPRIGHT 5, 3
+#define BOTTOMLEFT -10, 0
+#define BOTTOMRIGHT 5, 0
 
 
 
