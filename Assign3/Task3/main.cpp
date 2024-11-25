@@ -62,7 +62,7 @@ int main(){
 	Point bottomRight(BOTTOMRIGHT);
 
 	// Create pointers to lines of domain
-	std::unique_ptr<BottomCurve> bottom = std::make_unique<BottomCurve>(BottomCurveFunc, -10, 5);
+	std::unique_ptr<BottomCurve> bottom = std::make_unique<BottomCurve>(bottomBoundaryFunc);
 	std::unique_ptr<StraightLine> top = std::make_unique<StraightLine>(topLeft, topRight);
 	std::unique_ptr<StraightLine> left = std::make_unique<StraightLine>(bottomLeft, topLeft);
 	std::unique_ptr<StraightLine> right = std::make_unique<StraightLine>(bottomRight, topRight);

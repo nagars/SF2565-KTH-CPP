@@ -201,23 +201,26 @@ public:
 	};
 
 private:
-	virtual Point gamma(double t)const{
-		double pointOfInterest = begin_limit + t*(end_limit - begin_limit);
+
+	//virtual Point gamma(double t)const {
+	virtual Point gamma(double t){
+		double pointOfInterest = BottomCurveDomainFunc(t);
 		// Returns func value parameterized
 		Point p_toGet(pointOfInterest, eqFunc(pointOfInterest));
 		return p_toGet;
 	};
 
 	// Differentiation done through finite difference approximation
-	virtual Point gammaprime(double t)const{
-		double pointOfInterest =
+	//virtual Point gammaprime(double t)const {
+	virtual Point gammaprime(double t){
+		double pointOfInterest = BottomCurveDomainFunc(t);
 		// Returns differentiated func value
 		Point p_toGet(pointOfInterest,((eqFunc(pointOfInterest + DELTAX) -
 				eqFunc(pointOfInterest - DELTAX))/(2.0 * DELTAX)));
 		return p_toGet;
 	};
 
-	virtual double BottomCurveFunc(double t) override{
+	virtual double BottomCurveDomainFunc(double t){
 		return begin_limit + t*(end_limit - begin_limit);
 	}
 
@@ -229,19 +232,16 @@ protected:
 
 class BottomCurve : public EquationCurve{
 public:
-	BottomCurve(std::function<double(double)> func,
-			double begin_l, double end_l){
+	BottomCurve(std::function<double(double)> func){
 
-		// Initialise variables in EquationCurve
-		eqFunc = func;
-		begin_limit = begin_l;
-		end_limit = end_l;
-	};
+		eqFunc = func;;
+	}
 
 	// t -> [0,1]
-	double BottomCurveFunc(double t){
+	double BottomCurveDomainFunc(double t) override{
 		// Describes domain (-10,5)
 		double x = (1-t)*(-10) + 5*t;
+		return x;
 	}
 };
 
