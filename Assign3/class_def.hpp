@@ -8,7 +8,7 @@
 #ifndef CLASS_DEF_HPP_
 #define CLASS_DEF_HPP_
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <memory>
 #include <cassert>
@@ -38,7 +38,7 @@ protected:
 class Curve {
 public:
 	virtual ~Curve() = default;
-	virtual Point at(double t) const = 0;
+	virtual Point at_t(double t) const = 0;
 private:
 protected:
 };
