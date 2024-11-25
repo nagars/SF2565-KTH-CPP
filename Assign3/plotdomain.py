@@ -37,8 +37,8 @@ def plotDomain(xPath, yPath, ax=None, pointsize=0.1, linewidth=0.4):
     
     return ax
 
-xPath = 'PATH_TO_YOUR_X_FILE_HERE'
-yPath = 'PATH_TO_YOUR_Y_FILE_HERE'
+xPath = 'xdata'#PATH_TO_YOUR_X_FILE_HERE'
+yPath = 'ydata'#PATH_TO_YOUR_Y_FILE_HERE'
 
 ax = plotDomain(xPath, yPath)
 
