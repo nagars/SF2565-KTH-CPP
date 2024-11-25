@@ -10,13 +10,16 @@
 
 
 // n > 2
-#define NUM_DIVISIONS 5
+// #define NUM_DIVISIONS 5
+#define NUM_DIVISIONS 4
 
 // (y,x)  coordinates
 #define TOPLEFT -10, 3
-#define TOPRIGHT 5, 3
+// #define TOPRIGHT 5, 3
+#define TOPRIGHT 5, 7
 #define BOTTOMLEFT -10, 0
-#define BOTTOMRIGHT 5, 0
+// #define BOTTOMRIGHT 5, 0
+#define BOTTOMRIGHT 5, -2
 
 
 int main(){

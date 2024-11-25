@@ -65,11 +65,11 @@ public:
 			Point p_toGet(0,pointStart.y);	// Init x point as 0 for now
 			p_toGet.x = pointStart.x + t*(pointEnd.x - pointStart.x);
 			return p_toGet;
-		}else {
-
+		} else {
 			double pointOfInterest = pointStart.x + t*(pointEnd.x - pointStart.x);
 			Point p_toGet(pointOfInterest,0);	// Init y point as 0 for now
-			p_toGet.y = pointStart.y + t*(pointEnd.x - pointStart.x);
+			// p_toGet.y = pointStart.y + t*(pointEnd.x - pointStart.x);
+			p_toGet.y = pointStart.y + t*(pointEnd.y - pointStart.y);
 			return p_toGet;
 		}
 	};
@@ -146,27 +146,59 @@ public:
 	// // Generates an x,y pair based on xi and eta using tfi
 	// std::pair<double, double> TFI(double xi, double eta);
 
-	// Alessio 21/11/24 - Generates an x, y pair based on xi and eta using TFI
+	// Point TFI(double xi, double eta) {
+	// 	// Use the boundary curves to compute the x, y coordinates
+	// 	auto [xBottom, yBottom] = bottom->at(xi);
+	// 	auto [xTop, yTop] = top->at(xi);
+		// auto [xLeft, yLeft] = left->at(eta);
+		// auto [xRight, yRight] = right->at(eta);
+
+	// 	double x = (1 - eta) * xBottom + eta * xTop +
+	// 			(1 - xi) * xLeft + xi * xRight -
+	// 			(1 - xi) * (1 - eta) * xBottom -
+	// 			xi * (1 - eta) * xRight -
+	// 			(1 - xi) * eta * xLeft -
+	// 			xi * eta * xTop;
+
+	// 	double y = (1 - eta) * yBottom + eta * yTop +
+	// 			(1 - xi) * yLeft + xi * yRight -
+	// 			(1 - xi) * (1 - eta) * yBottom -
+	// 			xi * (1 - eta) * yRight -
+	// 			(1 - xi) * eta * yLeft -
+	// 			xi * eta * yTop;
+
+	// 	return Point(x, y);
+	// }
+
+	// Alessio 25/11/24 - Generates an x, y pair based on xi and eta using TFI
+	// Based on 'Basic structured grid generation (Farrashkhalvat, Miles) 
+	// section 4.3.2
 	Point TFI(double xi, double eta) {
 		// Use the boundary curves to compute the x, y coordinates
-		auto [xBottom, yBottom] = bottom->at(xi);
-		auto [xTop, yTop] = top->at(xi);
-		auto [xLeft, yLeft] = left->at(eta);
-		auto [xRight, yRight] = right->at(eta);
+		// 
+		auto [xBottom_atXi, yBottom_atXi] = bottom->at(xi);
+		auto [xTop_atXi, yTop_atXi] = top->at(xi);
+		auto [xRight_atEta, yRight_atEta] = right->at(eta);
+		auto [xLeft_atEta, yLeft_atEta] = left->at(eta);
+		auto [xBottom_atZero, yBottom_atZero] = bottom->at(0);
+		auto [xTop_atZero, yTop_atZero] = top->at(0);
+		auto [xBottom_atOne, yBottom_atOne] = bottom->at(1);
+		auto [xTop_atOne, yTop_atOne] = top->at(1);
 
-		double x = (1 - eta) * xBottom + eta * xTop +
-				(1 - xi) * xLeft + xi * xRight -
-				(1 - xi) * (1 - eta) * xBottom -
-				xi * (1 - eta) * xRight -
-				(1 - xi) * eta * xLeft -
-				xi * eta * xTop;
 
-		double y = (1 - eta) * yBottom + eta * yTop +
-				(1 - xi) * yLeft + xi * yRight -
-				(1 - xi) * (1 - eta) * yBottom -
-				xi * (1 - eta) * yRight -
-				(1 - xi) * eta * yLeft -
-				xi * eta * yTop;
+		double x = (1 - xi) * xLeft_atEta + xi * xRight_atEta
+				   + (1 - eta) * xBottom_atXi + eta * xTop_atXi
+				   - (1 - xi) * (1 - eta) * xBottom_atZero
+				   - (1 - xi) * eta * xTop_atZero
+				   - (1 - eta) * xi * xBottom_atOne
+				   - xi * eta * xTop_atOne;
+
+		double y = (1 - xi) * yLeft_atEta + xi * yRight_atEta
+				   + (1 - eta) * yBottom_atXi + eta * yTop_atXi
+				   - (1 - xi) * (1 - eta) * yBottom_atZero
+				   - (1 - xi) * eta * yTop_atZero
+				   - (1 - eta) * xi * yBottom_atOne
+				   - xi * eta * yTop_atOne;
 
 		return Point(x, y);
 	}
