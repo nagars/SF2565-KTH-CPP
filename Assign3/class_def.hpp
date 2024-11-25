@@ -207,8 +207,8 @@ public:
 	const Grid& GetGrid() const { return grid; }
 
 private:
-	std::unique_ptr <Curve> top;
 	std::unique_ptr <Curve> bottom;
+	std::unique_ptr <Curve> top;
 	std::unique_ptr <Curve> left;
 	std::unique_ptr <Curve> right;
 	Grid grid; // Grid that holds x and y coordinates
