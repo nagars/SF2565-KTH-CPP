@@ -15,9 +15,16 @@
 #include <limits>
 
 #include "Eigen/Eigen"
+#include <boost/math/quadrature/trapezoidal.hpp>
+#include <boost/math/tools/roots.hpp>
+#include <boost/math/differentiation/finite_difference.hpp>
 
 #define EPSILON std::numeric_limits<double>::epsilon()
-#define DELTAX std::sqrt(EPSILON)
+//#define DELTAX std::sqrt(EPSILON)
+#define DELTAX 0.1
+
+#define MAX_NEWTON_ITER			10000
+#define MAX_NEWTON_THRESHOLD	1e-5
 
 // Holds an x,y point
 class Point {
@@ -183,66 +190,96 @@ private:
 protected:
 };
 
-
 class EquationCurve:public Curve
 {
 public:
+
 	virtual~EquationCurve()=default;
 
 	// Compute reparametized curve
 	Point at(double t)const override{
-		assert(t > 1.0);
-		assert(t < 0.0);
+		// t -> s_hat
+		assert(t <= 1.0);
+		assert(t >= 0.0);
+
+/////////////////////
+		double s_1 = 0;
+		double root_old = 0;
+		double root = 0;
+
 		// Use gamma and gammaprime to compute points
 		// in reparametized curve
 
+		// Integrate gamma' over 0 to 1  [=/&]
+		auto vecLength = [=](double t){
+			Point gammaP = gammaprime(t);
+			double l = (double)sqrt(pow(gammaP.x,2) + pow(gammaP.y,2));
+			return l;
+		};
 
-		//boost::math::quadrature
+		s_1 = boost::math::quadrature::trapezoidal(vecLength, 0.0, 1.0, MAX_NEWTON_THRESHOLD);
+
+		// Newton method to find root (t) at which
+		for (uint16_t n = 0; n < MAX_NEWTON_ITER; n++){
+			// for loop
+
+			root = (root_old - (boost::math::quadrature::trapezoidal
+					(vecLength, 0.0, root_old, MAX_NEWTON_THRESHOLD)) - t * s_1) / (vecLength(root_old));
+
+			// going until convergence (t old = t new)
+			if(fabs(root_old - root) < MAX_NEWTON_THRESHOLD)
+				break;
+
+			root_old = root;
+		}
+
+		return gamma(root);
+//////////////////
+
+		// return gamma(t);
+
 	};
 
 private:
+	virtual Point gamma(double t)const = 0;
+	virtual Point gammaprime (double t)const = 0;
 
-	//virtual Point gamma(double t)const {
-	virtual Point gamma(double t){
-		double pointOfInterest = BottomCurveDomainFunc(t);
+protected:
+	std::function<double(double)> eqFunc;	// Gamma(t) function
+};
+
+class BottomCurve : public EquationCurve{
+
+public:
+
+	BottomCurve(std::function<double(double)> func){
+		eqFunc = func;;
+	}
+
+	// t -> [0,1]
+	double DomainFunc(double t) const{
+		// Describes domain (-10,5)
+		double x = (1-t)*(-10) + 5*t;
+		return x;
+	}
+
+	Point gamma(double t) const override{
+		double pointOfInterest = DomainFunc(t);
 		// Returns func value parameterized
 		Point p_toGet(pointOfInterest, eqFunc(pointOfInterest));
 		return p_toGet;
 	};
 
 	// Differentiation done through finite difference approximation
-	//virtual Point gammaprime(double t)const {
-	virtual Point gammaprime(double t){
-		double pointOfInterest = BottomCurveDomainFunc(t);
+	Point gammaprime(double t) const override{
+		double pointOfInterest = DomainFunc(t);
 		// Returns differentiated func value
 		Point p_toGet(pointOfInterest,((eqFunc(pointOfInterest + DELTAX) -
 				eqFunc(pointOfInterest - DELTAX))/(2.0 * DELTAX)));
 		return p_toGet;
 	};
 
-	virtual double BottomCurveDomainFunc(double t){
-		return begin_limit + t*(end_limit - begin_limit);
-	}
-
-protected:
-	std::function<double(double)> eqFunc;	// Gamma(t) function
-	double begin_limit;		// Function start limit
-	double end_limit;		// Function end limit
-};
-
-class BottomCurve : public EquationCurve{
-public:
-	BottomCurve(std::function<double(double)> func){
-
-		eqFunc = func;;
-	}
-
-	// t -> [0,1]
-	double BottomCurveDomainFunc(double t) override{
-		// Describes domain (-10,5)
-		double x = (1-t)*(-10) + 5*t;
-		return x;
-	}
+private:
 };
 
 
