@@ -166,6 +166,8 @@ public:
 		auto [xBottom_atOne, yBottom_atOne] = bottom->at(1);
 		auto [xTop_atOne, yTop_atOne] = top->at(1);
 
+// Alessio 27/11/24 - add logging of any at call returning NaN
+
 		double x = (1 - xi) * xLeft_atEta + xi * xRight_atEta
 				+ (1 - eta) * xBottom_atXi + eta * xTop_atXi
 				- (1 - xi) * (1 - eta) * xBottom_atZero
@@ -279,6 +281,7 @@ public:
 	}
 
 	// Returns P(t)
+// Alessio 27/11/24 - confirm eqFunc returns y(x)
 	Point gamma(double t) const override {
 		double x = x_of_t(t);
 		Point p_of_t(x, eqFunc(x));

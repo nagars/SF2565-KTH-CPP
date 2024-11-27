@@ -18,12 +18,15 @@
 #define BOTTOMLEFT -10, 0
 #define BOTTOMRIGHT 5, 0
 
-double bottomBoundaryFunc(double x){
+double bottomBoundaryFunc(double x) {
+// Alessio 27/11/24 - asserts to catch out-of-bounds
+assert(x>=-10);
+assert(x<=5);
 
 	double g = 0;
-	if(x < -3){
-		g = 1 + exp((-3)*(x + 6));
-	}else if ((x >= -3) && (x <= 5)){
+	if(x < -3) {
+		g = 1 + exp((-3) * (x + 6));
+	} else if ((x >= -3) && (x <= 5)) {
 		g = 1 + exp(3*x);
 	}
 
