@@ -10,7 +10,7 @@
 
 
 // n > 2
-#define NUM_DIVISIONS 16
+#define NUM_DIVISIONS 10
 
 // (x,y)  coordinates
 #define TOPLEFT -10, 3

@@ -15,8 +15,8 @@
 #include <limits>
 
 #include "Eigen/Eigen"
-#include <boost/math/quadrature/trapezoidal.hpp>
-#include <boost/math/tools/roots.hpp>
+// #include <boost/math/quadrature/trapezoidal.hpp>
+// #include <boost/math/tools/roots.hpp>
 #include <boost/math/differentiation/finite_difference.hpp>
 
 #define EPSILON std::numeric_limits<double>::epsilon()
@@ -203,40 +203,40 @@ public:
 		assert(t >= 0.0);
 
 /////////////////////
-		double s_1 = 0;
-		double root_old = 0;
-		double root = 0;
+		// double s_1 = 0;
+		// double root_old = 0;
+		// double root = 0;
 
-		// Use gamma and gammaprime to compute points
-		// in reparametized curve
+		// // Use gamma and gammaprime to compute points
+		// // in reparametized curve
 
-		// Integrate gamma' over 0 to 1  [=/&]
-		auto vecLength = [=](double t){
-			Point gammaP = gammaprime(t);
-			double l = (double)sqrt(pow(gammaP.x,2) + pow(gammaP.y,2));
-			return l;
-		};
+		// // Integrate gamma' over 0 to 1  [=/&]
+		// auto vecLength = [=](double t){
+		// 	Point gammaP = gammaprime(t);
+		// 	double l = (double)sqrt(pow(gammaP.x,2) + pow(gammaP.y,2));
+		// 	return l;
+		// };
 
-		s_1 = boost::math::quadrature::trapezoidal(vecLength, 0.0, 1.0, MAX_NEWTON_THRESHOLD);
+		// s_1 = boost::math::quadrature::trapezoidal(vecLength, 0.0, 1.0, MAX_NEWTON_THRESHOLD);
 
-		// Newton method to find root (t) at which
-		for (uint16_t n = 0; n < MAX_NEWTON_ITER; n++){
-			// for loop
+		// // Newton method to find root (t) at which
+		// for (uint16_t n = 0; n < MAX_NEWTON_ITER; n++){
+		// 	// for loop
 
-			root = (root_old - (boost::math::quadrature::trapezoidal
-					(vecLength, 0.0, root_old, MAX_NEWTON_THRESHOLD)) - t * s_1) / (vecLength(root_old));
+		// 	root = (root_old - (boost::math::quadrature::trapezoidal
+		// 			(vecLength, 0.0, root_old, MAX_NEWTON_THRESHOLD)) - t * s_1) / (vecLength(root_old));
 
-			// going until convergence (t old = t new)
-			if(fabs(root_old - root) < MAX_NEWTON_THRESHOLD)
-				break;
+		// 	// going until convergence (t old = t new)
+		// 	if(fabs(root_old - root) < MAX_NEWTON_THRESHOLD)
+		// 		break;
 
-			root_old = root;
-		}
+		// 	root_old = root;
+		// }
 
-		return gamma(root);
+		// return gamma(root);
 //////////////////
 
-		// return gamma(t);
+		return gamma(t);
 
 	};
 
@@ -256,27 +256,58 @@ public:
 		eqFunc = func;;
 	}
 
-	// t -> [0,1]
-	double DomainFunc(double t) const{
+	// // t -> [0,1]
+	// double DomainFunc(double t) const{
+	// 	// Describes domain (-10,5)
+	// 	double x = (1-t)*(-10) + 5*t;
+	// 	return x;
+	// }
+		// t -> [0,1]
+	double x_of_t(double t) const {
 		// Describes domain (-10,5)
-		double x = (1-t)*(-10) + 5*t;
+		double x = (1 - t) * (-10) + 5 * t;
 		return x;
 	}
 
-	Point gamma(double t) const override{
-		double pointOfInterest = DomainFunc(t);
+	// Point gamma(double t) const override{
+	// 	double pointOfInterest = DomainFunc(t);
+	// 	// Returns func value parameterized
+	// 	Point p_toGet(pointOfInterest, eqFunc(pointOfInterest));
+	// 	return p_toGet;
+	// };
+	Point gamma(double t) const override {
+		double x = x_of_t(t);
 		// Returns func value parameterized
-		Point p_toGet(pointOfInterest, eqFunc(pointOfInterest));
-		return p_toGet;
+		Point p_of_t(x, eqFunc(x));
+		return p_of_t;
 	};
 
 	// Differentiation done through finite difference approximation
-	Point gammaprime(double t) const override{
-		double pointOfInterest = DomainFunc(t);
-		// Returns differentiated func value
-		Point p_toGet(pointOfInterest,((eqFunc(pointOfInterest + DELTAX) -
-				eqFunc(pointOfInterest - DELTAX))/(2.0 * DELTAX)));
-		return p_toGet;
+	// Point gammaprime(double t) const override{
+	// 	double pointOfInterest = DomainFunc(t);
+	// 	// Returns differentiated func value
+	// 	Point p_toGet(pointOfInterest,((eqFunc(pointOfInterest + DELTAX) -
+	// 			eqFunc(pointOfInterest - DELTAX))/(2.0 * DELTAX)));
+	// 	return p_toGet;
+	// };
+	Point gammaprime(double t) const override {
+        using namespace boost::math::differentiation;
+		// Calculates dP(t)/dt
+
+		// Calculates x-dot. Uses capture variable to access the x_of_t class method
+		auto x_dot = finite_difference_derivative(
+			[this](double t_val) { return x_of_t(t_val);},
+			t);
+
+		// Calculates y-dot.
+		auto y_dot = finite_difference_derivative(
+			[this](double t_val) {
+				double x = x_of_t(t_val);
+				return eqFunc(x);
+			},
+			t);
+
+		return Point(x_dot, y_dot);
 	};
 
 private:
