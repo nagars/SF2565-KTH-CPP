@@ -19,13 +19,6 @@
 #include <boost/math/tools/roots.hpp>
 #include <boost/math/differentiation/finite_difference.hpp>
 
-// #define EPSILON std::numeric_limits<double>::epsilon()
-//#define DELTAX std::sqrt(EPSILON)
-// #define DELTAX 0.1
-
-// #define MAX_NEWTON_ITER			10000
-// #define MAX_NEWTON_THRESHOLD	1e-5
-
 // Holds an x,y point
 class Point {
 public:
@@ -166,8 +159,6 @@ public:
 		auto [xBottom_atOne, yBottom_atOne] = bottom->at(1);
 		auto [xTop_atOne, yTop_atOne] = top->at(1);
 
-// Alessio 27/11/24 - add logging of any at call returning NaN
-
 		double x = (1 - xi) * xLeft_atEta + xi * xRight_atEta
 				+ (1 - eta) * xBottom_atXi + eta * xTop_atXi
 				- (1 - xi) * (1 - eta) * xBottom_atZero
@@ -207,60 +198,89 @@ public:
 	// Compute reparametized curve
 	Point at(double t) const override {
 
-		double hatS = t; // rename to keep same signature as Curve class
-		double arcLengthTotal = arcLength(1.0); // full curve length
+		const double hatS = t; // use reference to keep same signature as Curve class
+		// while avoiding confusion in below function equations
+		const double arcLengthTotal = arcLength(1.0); // full curve length
 		double arcLengthTarget = hatS * arcLengthTotal; // Target arc-length value
 
-        // Define the function f(t) = s(t) - sTarget
-        auto f = [this, arcLengthTarget](double t) -> double {
-            return arcLength(t) - arcLengthTarget;
-        };
+		// Define the function f(t) = s(t) - sTarget
+		auto f = [this, arcLengthTarget](double t) -> double {
+			double temp = arcLength(t) - arcLengthTarget;
+			return temp;
+		};
 
-        // Define the function f'(t) = |dP/dt|
-        auto f_prime = [this](double t) -> double {
-            Point Pdot = this->gammaprime(t);
-            return std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
-        };
+		// Define the function f'(t) = |dP/dt|
+		auto f_prime = [this](double t) -> double {
+			Point Pdot = this->gammaprime(t);
+			double temp = std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
+			return temp;
+		};
 
-        // Use Newton's method from Boost
-		using namespace boost::math::tools;
-        uintmax_t max_iter = 50;
-        double t_of_hatS = newton_raphson_iterate(
-            [&f, &f_prime](double t) { return std::make_pair(f(t), f_prime(t)); },
-            0.5,  // Initial guess (t = 0.5, middle of computational domain)
-            0.0,  // Lower bound of t
-            1.0,  // Upper bound of t
-            TOL,  // Use defined tolerance
-            max_iter
-        );
+		//		uintmax_t max_iter = MAX_ITER;	// Max iterations for newtons method calculations
 
-        if (max_iter == 0) {
-            throw std::runtime_error("Newton's method didn't converge");
-        };
+		// Use Newton's method from Boost
+		//using namespace boost::math::tools;
 
-		// return something to clear syntax errors
-		return this->gamma(t_of_hatS);
+		// Note: Below API only accepts a function that returns
+		// a tuple of f(t) and f'(t). Defined as a lambda below.
+		//		double t_of_hatS = newton_raphson_iterate(
+		//				[&f, &f_prime](double t) { return std::make_pair(f(t), f_prime(t)); },
+		//				0.5,  // Initial guess (t = 0.5, middle of computational domain)
+		//				0.0,  // Lower bound of t
+		//				1.0,  // Upper bound of t
+		//				TOL,  // Use defined tolerance
+		//				max_iter
+		//		);
+
+		//if (max_iter == MAX_ITER) {
+		//	throw std::runtime_error("Newton's method didn't converge");
+		//};
+
+		// Newton method to find root convergence
+		double t_of_hatS = t;
+		for(uintmax_t n = 0; n < MAX_ITER; n++){
+			t_of_hatS = t - f(t)/f_prime(t);
+
+			// Break out upon convergence
+			// and return gamma of root
+			if(fabs(t_of_hatS - t) < TOL)
+				return gamma(t_of_hatS);
+
+			// update previous t value
+			t = t_of_hatS;
+		}
+
+		throw std::runtime_error("Newton's method didn't converge");
+
 	};
 
 private:
+
+	// Compute arc-length function s(t) using boost numerical integration
+	double arcLength(double t) const {
+
+		// No need to integrate if t is 0
+		if (t == 0) return 0;
+
+		// Define a lambda function
+		// to generate the integrand for arc-length calculation
+		auto normPdot = [this](double tau) -> double {
+			Point Pdot = this->gammaprime(tau);
+			return std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
+		};
+
+		using namespace boost::math::quadrature;
+		// Perform numerical integration over [0, t]
+		return trapezoidal(normPdot, 0.0, t, TOL);
+	}
+
+
 	virtual Point gamma(double t) const = 0;
 	virtual Point gammaprime (double t) const = 0;
 
-	static constexpr double TOL = 1e-6; // Tolerance for numerical calculations
+	const double TOL = 1e-12; // Tolerance for numerical calculations
+	const uintmax_t MAX_ITER = 10000;	// Max iterations for newton method
 
-	// Compute arc-length function s(t) using boost numerical integration
-    double arcLength(double t) const {
-        using namespace boost::math::quadrature;
-
-        // Define the integrand for arc-length calculation
-        auto normPdot = [this](double tau) -> double {
-            Point Pdot = this->gammaprime(tau);
-            return std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
-        };
-
-        // Perform numerical integration over [0, t]
-        return trapezoidal(normPdot, 0.0, t, TOL);
-    }
 
 protected:
 	std::function<double(double)> eqFunc;
@@ -275,13 +295,15 @@ public:
 	}
 
 	double x_of_t(double t) const {
+		//Check for edge cases
+		if (t < 0) t = 0;
+		if (t > 1) t = 1;
 		// Describes domain (-10,5)
 		double x = (1 - t) * (-10) + 5 * t;
 		return x;
 	}
 
 	// Returns P(t)
-// Alessio 27/11/24 - confirm eqFunc returns y(x)
 	Point gamma(double t) const override {
 		double x = x_of_t(t);
 		Point p_of_t(x, eqFunc(x));
@@ -290,20 +312,18 @@ public:
 
 	// Calculates dP(t)/dt using finite differences
 	Point gammaprime(double t) const override {
-        using namespace boost::math::differentiation;
+		using namespace boost::math::differentiation;
 
 		// Calculates x-dot. Uses capture variable to access the x_of_t class method
 		auto x_dot = finite_difference_derivative(
-			[this](double t_val) { return x_of_t(t_val);},
-			t);
+				[this](double t_val) { return x_of_t(t_val);}, t);
 
 		// Calculates y-dot.
 		auto y_dot = finite_difference_derivative(
-			[this](double t_val) {
-				double x = x_of_t(t_val);
-				return eqFunc(x);
-			},
-			t);
+				[this](double t_val) {
+			double x = x_of_t(t_val);
+			return eqFunc(x);
+		}, t);
 
 		return Point(x_dot, y_dot);
 	};

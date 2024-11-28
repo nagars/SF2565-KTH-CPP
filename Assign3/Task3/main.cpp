@@ -9,8 +9,8 @@
 #include <fstream> // For file operations
 
 
-// n > 2
-#define NUM_DIVISIONS 10
+// Grid divisions: n > 2
+#define NUM_DIVISIONS 100
 
 // (x,y)  coordinates
 #define TOPLEFT -10, 3
@@ -19,12 +19,16 @@
 #define BOTTOMRIGHT 5, 0
 
 double bottomBoundaryFunc(double x) {
-// Alessio 27/11/24 - asserts to catch out-of-bounds
-assert(x>=-10);
-assert(x<=5);
+
+	// Weed out edge cases
+	if (x < -10){
+		x = -10;
+	} else if (x > 5){
+		x = 5;
+	}
 
 	double g = 0;
-	if(x < -3) {
+	if((x < -3) && (x >= -10)){
 		g = 1 + exp((-3) * (x + 6));
 	} else if ((x >= -3) && (x <= 5)) {
 		g = 1 + exp(3*x);
