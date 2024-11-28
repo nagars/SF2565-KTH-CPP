@@ -13,17 +13,21 @@
 #include <memory>
 #include <cassert>
 #include <limits>
+#include <iostream>
 
 #include "Eigen/Eigen"
 #include <boost/math/quadrature/trapezoidal.hpp>
-#include <boost/math/tools/roots.hpp>
+// #include <boost/math/tools/roots.hpp>
 #include <boost/math/differentiation/finite_difference.hpp>
+
 
 // Holds an x,y point
 class Point {
+
 public:
 	// Default Constructor
-	Point();
+	// Point();
+	Point() : x(0.0), y(0.0) {}
 	// Parameter Constructor
 	Point(const double xCoord, const double yCoord)
 	: x(xCoord), y(yCoord){}
@@ -31,6 +35,7 @@ public:
 	double x, y;
 
 private:
+
 protected:
 };
 
@@ -39,9 +44,12 @@ class Curve {
 public:
 	virtual ~Curve() = default;
 	virtual Point at(double t) const = 0;
+
 private:
+
 protected:
 };
+
 
 // Used to represent the line boundaries of the top/left/right
 class StraightLine : public Curve {
@@ -198,6 +206,12 @@ public:
 	// Compute reparametized curve
 	Point at(double t) const override {
 
+		// Check if P(t) has been computed previously
+		auto found = cache.find(t);
+		if (found != cache.end()) {
+			return found->second; // Return the cached point
+		}
+
 		const double hatS = t; // use reference to keep same signature as Curve class
 		// while avoiding confusion in below function equations
 		const double arcLengthTotal = arcLength(1.0); // full curve length
@@ -216,35 +230,17 @@ public:
 			return temp;
 		};
 
-		//		uintmax_t max_iter = MAX_ITER;	// Max iterations for newtons method calculations
-
-		// Use Newton's method from Boost
-		//using namespace boost::math::tools;
-
-		// Note: Below API only accepts a function that returns
-		// a tuple of f(t) and f'(t). Defined as a lambda below.
-		//		double t_of_hatS = newton_raphson_iterate(
-		//				[&f, &f_prime](double t) { return std::make_pair(f(t), f_prime(t)); },
-		//				0.5,  // Initial guess (t = 0.5, middle of computational domain)
-		//				0.0,  // Lower bound of t
-		//				1.0,  // Upper bound of t
-		//				TOL,  // Use defined tolerance
-		//				max_iter
-		//		);
-
-		//if (max_iter == MAX_ITER) {
-		//	throw std::runtime_error("Newton's method didn't converge");
-		//};
-
 		// Newton method to find root convergence
 		double t_of_hatS = t;
-		for(uintmax_t n = 0; n < MAX_ITER; n++){
+		for(uintmax_t n = 0; n < MAX_ITER; n++) {
 			t_of_hatS = t - f(t)/f_prime(t);
 
-			// Break out upon convergence
-			// and return gamma of root
-			if(fabs(t_of_hatS - t) < TOL)
-				return gamma(t_of_hatS);
+			// Upon convergence, cache and return the computed point
+			if(fabs(t_of_hatS - t) < TOL) {
+				Point result = gamma(t_of_hatS);
+				cache[t] = result;
+				return result;
+			}
 
 			// update previous t value
 			t = t_of_hatS;
@@ -255,7 +251,6 @@ public:
 	};
 
 private:
-
 	// Compute arc-length function s(t) using boost numerical integration
 	double arcLength(double t) const {
 
@@ -274,13 +269,13 @@ private:
 		return trapezoidal(normPdot, 0.0, t, TOL);
 	}
 
-
 	virtual Point gamma(double t) const = 0;
 	virtual Point gammaprime (double t) const = 0;
 
+	mutable std::unordered_map<double, Point> cache; // Cache of already computed points
+
 	const double TOL = 1e-12; // Tolerance for numerical calculations
 	const uintmax_t MAX_ITER = 10000;	// Max iterations for newton method
-
 
 protected:
 	std::function<double(double)> eqFunc;
