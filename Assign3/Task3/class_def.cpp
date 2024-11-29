@@ -10,7 +10,14 @@
 /**EquationCurve**/
 double EquationCurve::arcLength(double t) const {
 	// No need to integrate if t is 0
-	if (t == 0) return 0;
+	if (t == 0) { 
+		return 0;
+	}
+
+	// Use cached total curve length if available
+	if ((t == 1) && (totalLengthComputed)) {
+				return totalLength;
+	};
 
 	// Define a lambda function
 	// to generate the integrand for arc-length calculation
@@ -21,7 +28,11 @@ double EquationCurve::arcLength(double t) const {
 
 	using namespace boost::math::quadrature;
 	// Perform numerical integration over [0, t]
-	return trapezoidal(normPdot, 0.0, t, TOL);
+	double result = trapezoidal(normPdot, 0.0, t, TOL);
+	if (t == 1) { 
+		totalLengthComputed = true;
+	}
+	return result;
 }
 
 Point EquationCurve::at(double t) const {

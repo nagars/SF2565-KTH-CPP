@@ -39,8 +39,8 @@ def plotDomain(xPath, yPath, ax=None, pointsize=0.1, linewidth=0.4):
 
 xPath = 'xdata'#PATH_TO_YOUR_X_FILE_HERE'
 yPath = 'ydata'#PATH_TO_YOUR_Y_FILE_HERE'
-# xPath = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign3\Task3\xdata'
-# yPath = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign3\Task3\ydata'
+xPath = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign3\Task3\xdata'
+yPath = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign3\Task3\ydata'
 
 ax = plotDomain(xPath, yPath)
 
