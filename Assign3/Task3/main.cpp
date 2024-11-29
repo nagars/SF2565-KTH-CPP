@@ -15,10 +15,13 @@ sf::Timer timer;
 
 // Grid divisions: n > 2
 // #define NUM_DIVISIONS 10
+// #define NUM_DIVISIONS 30
 // #define NUM_DIVISIONS 50
 // #define NUM_DIVISIONS 100
 // #define NUM_DIVISIONS 150
- #define NUM_DIVISIONS 300
+// #define NUM_DIVISIONS 200
+//  #define NUM_DIVISIONS 300
+ #define NUM_DIVISIONS 500
 
 // (x,y)  coordinates
 #define TOPLEFT -10, 3
@@ -60,10 +63,6 @@ void printGrid(const Grid &grid){
 	filex << grid.GetX().format(CommaInitFmt) << "\n";
 	filey << grid.GetY().format(CommaInitFmt) << "\n";
 
-	// // Print to stdout
-	// std::cout << grid.GetX().format(CommaInitFmt) << "\n\n";
-	// std::cout << grid.GetY().format(CommaInitFmt) << "\n";
-
 	// Close file stream
 	filex.std::ofstream::close();
 	filey.std::ofstream::close();
@@ -103,9 +102,6 @@ int main() {
 	Domain domain(std::move(bottom), std::move(top),
 			std::move(left), std::move(right),
 			NUM_DIVISIONS);
-
-	// // Create Algebraic Grid
-	// domain.GenerateGrid();
 
 	// Time grid generation without and with a point cache
 	timeExecution(domain, false);

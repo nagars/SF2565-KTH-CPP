@@ -25,18 +25,19 @@ double EquationCurve::arcLength(double t) const {
 }
 
 Point EquationCurve::at(double t) const {
+	// Return cached value if previously computed
 	if (cacheEnabled) {
-		// Check if P(t) has been computed previously
 		auto found = cache.find(t);
 		if (found != cache.end()) {
-			return found->second; // Return the cached point
+			return found->second;
 		}
 	}
-
-	const double hatS = t; // use reference to keep same signature as Curve class
-	// while avoiding confusion in below function equations
-	const double arcLengthTotal = arcLength(1.0); // full curve length
-	double arcLengthTarget = hatS * arcLengthTotal; // Target arc-length value
+	// Compute s(1) if not already in cache
+	if (!totalLengthComputed) {
+		totalLength = arcLength(1.0);
+		totalLengthComputed = true;
+	} 
+	double arcLengthTarget = t * totalLength; // Target arc-length value
 
 	// Define the function f(t) = s(t) - sTarget
 	auto f = [this, arcLengthTarget](double t) -> double {

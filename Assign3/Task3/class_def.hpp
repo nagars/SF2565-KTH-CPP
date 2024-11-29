@@ -75,10 +75,14 @@ private:
 	const double TOL = 1e-12; // Tolerance for numerical calculations
 	const uintmax_t MAX_ITER = 10000;	// Max iterations for newton method
 
+	mutable double totalLength = 0.0; // Total curve arc length s(1)
+	mutable bool totalLengthComputed = false; // Flag indicating s(1) already computed
+
+	mutable std::unordered_map<double, Point> cache; // Cache of already computed points
+	bool cacheEnabled = false; // point cache toggle status
+
 protected:
 	std::function<double(double)> eqFunc;
-	bool cacheEnabled = false; // point cache toggle status
-	mutable std::unordered_map<double, Point> cache; // Cache of already computed points
 };
 
 
