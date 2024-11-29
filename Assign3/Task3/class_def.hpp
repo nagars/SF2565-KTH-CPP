@@ -39,6 +39,7 @@ private:
 protected:
 };
 
+
 // Used to represent the bottom curve
 class Curve {
 public:
@@ -48,6 +49,100 @@ public:
 private:
 
 protected:
+};
+
+
+class EquationCurve:public Curve {
+
+public:
+	virtual~EquationCurve() = default;
+
+	// Compute reparametized curve
+	// Option to use point cache to compare peformance
+	Point at(double t) const override {
+		if (cacheEnabled) {
+			// Check if P(t) has been computed previously
+			auto found = cache.find(t);
+			if (found != cache.end()) {
+				return found->second; // Return the cached point
+			}
+		}
+
+		const double hatS = t; // use reference to keep same signature as Curve class
+		// while avoiding confusion in below function equations
+		const double arcLengthTotal = arcLength(1.0); // full curve length
+		double arcLengthTarget = hatS * arcLengthTotal; // Target arc-length value
+
+		// Define the function f(t) = s(t) - sTarget
+		auto f = [this, arcLengthTarget](double t) -> double {
+			double temp = arcLength(t) - arcLengthTarget;
+			return temp;
+		};
+
+		// Define the function f'(t) = |dP/dt|
+		auto f_prime = [this](double t) -> double {
+			Point Pdot = this->gammaprime(t);
+			double temp = std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
+			return temp;
+		};
+
+		// Newton method to find root convergence
+		double t_of_hatS = t;
+		for(uintmax_t n = 0; n < MAX_ITER; n++) {
+			t_of_hatS = t - f(t)/f_prime(t);
+
+			// Upon convergence, cache and return the computed point
+			if(fabs(t_of_hatS - t) < TOL) {
+				Point result = gamma(t_of_hatS);
+				if (cacheEnabled) {
+					cache[t] = result;
+				}
+				return result;
+			}
+
+			// update previous t value
+			t = t_of_hatS;
+		}
+
+		throw std::runtime_error("Newton's method didn't converge");
+
+	}
+	
+	// Activate point cache for performance testing
+	void enableCache(bool enable) {
+		cacheEnabled = enable;
+	}
+
+private:
+	// Compute arc-length function s(t) using boost numerical integration
+	double arcLength(double t) const {
+
+		// No need to integrate if t is 0
+		if (t == 0) return 0;
+
+		// Define a lambda function
+		// to generate the integrand for arc-length calculation
+		auto normPdot = [this](double tau) -> double {
+			Point Pdot = this->gammaprime(tau);
+			return std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
+		};
+
+		using namespace boost::math::quadrature;
+		// Perform numerical integration over [0, t]
+		return trapezoidal(normPdot, 0.0, t, TOL);
+	}
+
+	virtual Point gamma(double t) const = 0;
+	virtual Point gammaprime (double t) const = 0;
+
+	mutable std::unordered_map<double, Point> cache; // Cache of already computed points
+
+	const double TOL = 1e-12; // Tolerance for numerical calculations
+	const uintmax_t MAX_ITER = 10000;	// Max iterations for newton method
+
+protected:
+	std::function<double(double)> eqFunc;
+	bool cacheEnabled = false; // point cache toggle status
 };
 
 
@@ -88,6 +183,51 @@ private:
 	static constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
 protected:
+};
+
+
+class BottomCurve : public EquationCurve {
+
+public:
+	BottomCurve(std::function<double(double)> func) {
+		eqFunc = func;
+	}
+
+	double x_of_t(double t) const {
+		//Check for edge cases
+		if (t < 0) t = 0;
+		if (t > 1) t = 1;
+		// Describes domain (-10,5)
+		double x = (1 - t) * (-10) + 5 * t;
+		return x;
+	}
+
+	// Returns P(t)
+	Point gamma(double t) const override {
+		double x = x_of_t(t);
+		Point p_of_t(x, eqFunc(x));
+		return p_of_t;
+	};
+
+	// Calculates dP(t)/dt using finite differences
+	Point gammaprime(double t) const override {
+		using namespace boost::math::differentiation;
+
+		// Calculates x-dot. Uses capture variable to access the x_of_t class method
+		auto x_dot = finite_difference_derivative(
+				[this](double t_val) { return x_of_t(t_val);}, t);
+
+		// Calculates y-dot.
+		auto y_dot = finite_difference_derivative(
+				[this](double t_val) {
+			double x = x_of_t(t_val);
+			return eqFunc(x);
+		}, t);
+
+		return Point(x_dot, y_dot);
+	};
+
+private:
 };
 
 
@@ -184,6 +324,12 @@ public:
 		return Point(x, y);
 	}
 
+	// Activate point cache of bottom boundary for performance testing
+	void enableCache(bool enable) {
+		auto* bottomBoundary = dynamic_cast<EquationCurve*>(bottom.get());
+		bottomBoundary->enableCache(enable);
+	}
+
 	// Grid getter
 	const Grid& GetGrid() const { return grid; }
 
@@ -195,135 +341,6 @@ private:
 	Grid grid; // Grid that holds x and y coordinates
 
 protected:
-};
-
-
-class EquationCurve:public Curve {
-
-public:
-	virtual~EquationCurve()=default;
-
-	// Compute reparametized curve
-	Point at(double t) const override {
-
-		// Check if P(t) has been computed previously
-		auto found = cache.find(t);
-		if (found != cache.end()) {
-			return found->second; // Return the cached point
-		}
-
-		const double hatS = t; // use reference to keep same signature as Curve class
-		// while avoiding confusion in below function equations
-		const double arcLengthTotal = arcLength(1.0); // full curve length
-		double arcLengthTarget = hatS * arcLengthTotal; // Target arc-length value
-
-		// Define the function f(t) = s(t) - sTarget
-		auto f = [this, arcLengthTarget](double t) -> double {
-			double temp = arcLength(t) - arcLengthTarget;
-			return temp;
-		};
-
-		// Define the function f'(t) = |dP/dt|
-		auto f_prime = [this](double t) -> double {
-			Point Pdot = this->gammaprime(t);
-			double temp = std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
-			return temp;
-		};
-
-		// Newton method to find root convergence
-		double t_of_hatS = t;
-		for(uintmax_t n = 0; n < MAX_ITER; n++) {
-			t_of_hatS = t - f(t)/f_prime(t);
-
-			// Upon convergence, cache and return the computed point
-			if(fabs(t_of_hatS - t) < TOL) {
-				Point result = gamma(t_of_hatS);
-				cache[t] = result;
-				return result;
-			}
-
-			// update previous t value
-			t = t_of_hatS;
-		}
-
-		throw std::runtime_error("Newton's method didn't converge");
-
-	};
-
-private:
-	// Compute arc-length function s(t) using boost numerical integration
-	double arcLength(double t) const {
-
-		// No need to integrate if t is 0
-		if (t == 0) return 0;
-
-		// Define a lambda function
-		// to generate the integrand for arc-length calculation
-		auto normPdot = [this](double tau) -> double {
-			Point Pdot = this->gammaprime(tau);
-			return std::sqrt(Pdot.x * Pdot.x + Pdot.y * Pdot.y);
-		};
-
-		using namespace boost::math::quadrature;
-		// Perform numerical integration over [0, t]
-		return trapezoidal(normPdot, 0.0, t, TOL);
-	}
-
-	virtual Point gamma(double t) const = 0;
-	virtual Point gammaprime (double t) const = 0;
-
-	mutable std::unordered_map<double, Point> cache; // Cache of already computed points
-
-	const double TOL = 1e-12; // Tolerance for numerical calculations
-	const uintmax_t MAX_ITER = 10000;	// Max iterations for newton method
-
-protected:
-	std::function<double(double)> eqFunc;
-};
-
-
-class BottomCurve : public EquationCurve {
-
-public:
-	BottomCurve(std::function<double(double)> func) {
-		eqFunc = func;;
-	}
-
-	double x_of_t(double t) const {
-		//Check for edge cases
-		if (t < 0) t = 0;
-		if (t > 1) t = 1;
-		// Describes domain (-10,5)
-		double x = (1 - t) * (-10) + 5 * t;
-		return x;
-	}
-
-	// Returns P(t)
-	Point gamma(double t) const override {
-		double x = x_of_t(t);
-		Point p_of_t(x, eqFunc(x));
-		return p_of_t;
-	};
-
-	// Calculates dP(t)/dt using finite differences
-	Point gammaprime(double t) const override {
-		using namespace boost::math::differentiation;
-
-		// Calculates x-dot. Uses capture variable to access the x_of_t class method
-		auto x_dot = finite_difference_derivative(
-				[this](double t_val) { return x_of_t(t_val);}, t);
-
-		// Calculates y-dot.
-		auto y_dot = finite_difference_derivative(
-				[this](double t_val) {
-			double x = x_of_t(t_val);
-			return eqFunc(x);
-		}, t);
-
-		return Point(x_dot, y_dot);
-	};
-
-private:
 };
 
 

@@ -2,21 +2,30 @@
  * main.cpp
  *
  *  Created on: Nov 12, 2024
- *      Author: Shawn
+ *      Author: Shawn / Alessio
  */
 #include "class_def.hpp"
 #include <iostream>
 #include <fstream> // For file operations
+#include <chrono>
+#include "timer.hpp"
+
+using namespace std::chrono;
+sf::Timer timer;
 
 
 // Grid divisions: n > 2
-#define NUM_DIVISIONS 100
+#define NUM_DIVISIONS 10
+// #define NUM_DIVISIONS 50
+// #define NUM_DIVISIONS 100
+// #define NUM_DIVISIONS 150
 
 // (x,y)  coordinates
 #define TOPLEFT -10, 3
 #define TOPRIGHT 5, 3
 #define BOTTOMLEFT -10, 0
 #define BOTTOMRIGHT 5, 0
+
 
 double bottomBoundaryFunc(double x) {
 
@@ -51,17 +60,33 @@ void printGrid(const Grid &grid){
 	filex << grid.GetX().format(CommaInitFmt) << "\n";
 	filey << grid.GetY().format(CommaInitFmt) << "\n";
 
-	// Print to stdout
-	std::cout << grid.GetX().format(CommaInitFmt) << "\n\n";
-	std::cout << grid.GetY().format(CommaInitFmt) << "\n";
+	// // Print to stdout
+	// std::cout << grid.GetX().format(CommaInitFmt) << "\n\n";
+	// std::cout << grid.GetY().format(CommaInitFmt) << "\n";
 
 	// Close file stream
 	filex.std::ofstream::close();
 	filey.std::ofstream::close();
 }
 
-int main(){
 
+// Compare performance with and without using a cache
+void timeExecution(Domain& domain, bool useCache) {
+	if (useCache){
+		domain.enableCache(true);
+		timer.start("Generating a grid with "
+			+ std::to_string(NUM_DIVISIONS) + " divisions, using a cache,");
+	} else {
+		timer.start("Generating a grid with "
+			+ std::to_string(NUM_DIVISIONS) + " divisions, without caching results,");
+	}
+	// Create Algebraic Grid
+	domain.GenerateGrid();
+	timer.stop();
+}
+
+
+int main() {
 	// Create corner points
 	Point topLeft(TOPLEFT);
 	Point topRight(TOPRIGHT);
@@ -75,18 +100,21 @@ int main(){
 	std::unique_ptr<StraightLine> right = std::make_unique<StraightLine>(bottomRight, topRight);
 
 	// Generate Domain
-	Domain linearDomain(std::move(bottom), std::move(top),
+	Domain domain(std::move(bottom), std::move(top),
 			std::move(left), std::move(right),
 			NUM_DIVISIONS);
 
-	// Create Algebraic Grid
-	linearDomain.GenerateGrid();
+	// // Create Algebraic Grid
+	// domain.GenerateGrid();
 
-	const auto& grid = linearDomain.GetGrid();
+	// Time grid generation without and with a point cache
+	timeExecution(domain, false);
+	timeExecution(domain, true);
+
+	const auto& grid = domain.GetGrid();
 
 	// Write to file
 	printGrid(grid);
-
 
 	return 0;
 }
