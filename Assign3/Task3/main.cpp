@@ -15,9 +15,10 @@ sf::Timer timer;
 
 // Grid divisions: n > 2
 // #define NUM_DIVISIONS 10
-#define NUM_DIVISIONS 50
+// #define NUM_DIVISIONS 50
 // #define NUM_DIVISIONS 100
 // #define NUM_DIVISIONS 150
+ #define NUM_DIVISIONS 300
 
 // (x,y)  coordinates
 #define TOPLEFT -10, 3
