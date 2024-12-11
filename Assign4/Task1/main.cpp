@@ -7,9 +7,42 @@ Created on: Dec 6, 2024
 #include <random>
 #include <assert.h>
 #include <cmath>
+#include <fstream>
+#include <iostream>
 
-#define DT 1e-3  // time step
-#define MAX_B	10
+#define DT 1e-3  	// time step
+#define MAX_B	10	// Max value of b values to use
+#define B_VAL_INCREMENT 1	// b value increment
+
+void printToFile(const std::vector<std::vector<double>> extinctionTimes,
+		const std::vector<double> b_vals,
+		const std::vector<double> timesteps){
+
+	// Open a file for writing
+	std::ofstream filex("xdata");
+	std::ofstream filey("ydata");
+
+	// Print to file
+	// Print time steps to filex
+	for (const auto &element : timesteps) filex << element << " ";
+	filex << "\n";
+
+	// Append b value for associated row
+
+	for (size_t i = 0; i < b_vals.size(); i++){
+		filey << b_vals[i] << " ";
+
+		// Print vectors of extinction times for various b values
+		for (const auto &elemente : extinctionTimes[i]){filey << elemente << " ";}
+		filey << "\n";
+
+
+	}
+	// Close file stream
+	filex.std::ofstream::close();
+	filey.std::ofstream::close();
+}
+
 
 
 // Generate M initial conditions for equation (1) in assignment
@@ -41,7 +74,8 @@ std::vector<double> pExtinctionTimes(std::vector<double>& times, double b) {
 	constexpr int IC_SAMPLES = 1e4;
 
 	// Initial conditions vector X0
-	std::vector<double> ICsamples = generateICSamples(ICsamples, IC_SAMPLES, b);
+	std::vector<double> ICsamples;
+	generateICSamples(ICsamples, IC_SAMPLES, b);
 
 	/* Calculate the extinction time for each IC
        using the  Euler-Maruyama scheme */
@@ -86,7 +120,7 @@ void serial(std::vector<double> timestamps, double M) {
 
 	// Create a vector of b values (include 1)
 	std::vector<double> b;
-	for(int i = 1; i < MAX_B; i++){
+	for(int i = 1; i < MAX_B; i+=B_VAL_INCREMENT){
 		b.emplace_back(i);
 	}
 
@@ -107,6 +141,7 @@ void serial(std::vector<double> timestamps, double M) {
 
 
 	// Generate data for plotting
+	printToFile(extinctionTimes, b, timestamps);
 
 	///// Python code /////
 	// For each b
@@ -140,9 +175,13 @@ void parallel(double M, double b) {
 
 int main() {
 	// Create a vector of times
+	std::vector<double> timesteps;
+	for(double i = 0; i < 1; i+=DT)
+		timesteps.emplace_back(i);
 
 	// Set M = 1e4
 	// execute serial(M)
+	serial(timesteps, 1e4);
 
 	// pick a value of b = B from the results of Task I
 	// Set M = 1e6 or more, as needed
