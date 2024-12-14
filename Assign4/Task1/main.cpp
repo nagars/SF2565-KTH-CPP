@@ -14,6 +14,7 @@ Created on: Dec 6, 2024
 #define MAX_B	10	// Max value of b values to use
 #define B_VAL_INCREMENT 1	// b value increment
 
+
 void printToFile(const std::vector<std::vector<double>> extinctionTimes,
 		const std::vector<double> b_vals,
 		const std::vector<double> timesteps){
@@ -24,23 +25,31 @@ void printToFile(const std::vector<std::vector<double>> extinctionTimes,
 
 	// Print to file
 	// Print time steps to filex
-	for (const auto &element : timesteps) filex << element << " ";
+	// for (const auto &element : timesteps) filex << element << " ";
+	for (size_t i = 0; i < timesteps.size(); ++i) {
+		filex << timesteps[i];
+		if (i != timesteps.size() - 1) filex << " ";
+	}
 	filex << "\n";
 
 	// Append b value for associated row
-
-	for (size_t i = 0; i < b_vals.size(); i++){
+	// for (size_t i = 0; i < b_vals.size(); i++) {
+	for (size_t i = 0; i < b_vals.size(); ++i) {
 		filey << b_vals[i] << " ";
-
 		// Print vectors of extinction times for various b values
-		for (const auto &elemente : extinctionTimes[i]){filey << elemente << " ";}
+		// for (const auto &elemente : extinctionTimes[i]){filey << elemente << " ";}
+		for (size_t j = 0; j < extinctionTimes[i].size(); ++j) {
+			filey << extinctionTimes[i][j];
+			if (j != extinctionTimes[i].size() - 1) filey << " ";
+		}
 		filey << "\n";
-
-
 	}
+
 	// Close file stream
-	filex.std::ofstream::close();
-	filey.std::ofstream::close();
+	// filex.std::ofstream::close();
+	// filey.std::ofstream::close();
+	filex.close();
+	filey.close();
 }
 
 
