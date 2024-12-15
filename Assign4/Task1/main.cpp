@@ -93,13 +93,13 @@ std::vector<double> pExtinctionTimes(std::vector<double>& times, double b) {
 	std::mt19937 gen(rd()); // Random number generator
 	std::normal_distribution<> dStandard(0.0, 1.0); // Standard normal pdf
 	// For each IC (m) in ICsamples (M)
-	for(int m = 0; m < IC_SAMPLES; m++){
+	for (int m = 0; m < IC_SAMPLES; m++) {
 		// start stepping using the
 		double Xn = ICsamples[m] ;
-		for(int n = 0; ;n++){
+		for (int n = 0; ;n++) {
 			Xn = Xn + (-b)*DT + sqrt(DT)*dStandard(gen);
 			// if Xn<=0
-			if(Xn <= 0){
+			if (Xn <= 0) {
 				// record the extinction time Tm=n*dt
 				// break out
 				extinctionTimes.emplace_back(n*DT);
@@ -107,18 +107,30 @@ std::vector<double> pExtinctionTimes(std::vector<double>& times, double b) {
 			}
 		}
 
-		// Calculation of probability
-		// for each time in times
-		std::vector<double> probability;
-		for(size_t n = 0; n < times.size(); n++){
-			double sum = 0;
-			for(int m = 0; m < IC_SAMPLES; m++){
-				sum += (extinctionTimes[m] > times[n]);
-			}
-			probability.emplace_back(sum / IC_SAMPLES);
-		}
-		return probability;
+		// // Calculation of probability
+		// // for each time in times
+		// std::vector<double> probability;
+		// for(size_t n = 0; n < times.size(); n++){
+		// 	double sum = 0;
+		// 	for(int m = 0; m < IC_SAMPLES; m++){
+		// 		sum += (extinctionTimes[m] > times[n]);
+		// 	}
+		// 	probability.emplace_back(sum / IC_SAMPLES);
+		// }
+		// return probability;
 	}
+
+	// Calculation of probability
+	// for each time in times
+	std::vector<double> probability;
+	for (size_t n = 0; n < times.size(); n++) {
+		double sum = 0;
+		for (int m = 0; m < IC_SAMPLES; m++) {
+			sum += (extinctionTimes[m] > times[n]);
+		}
+		probability.emplace_back(sum / IC_SAMPLES);
+	}
+	return probability;
 }
 
 
