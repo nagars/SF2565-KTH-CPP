@@ -89,15 +89,18 @@ std::vector<double> extinctionTimes(std::vector<double>& times, double b) {
 	std::vector<double> ICsamples;
 	generateICSamples(ICsamples, IC_SAMPLES, b);
 
-	std::vector<double> r_extinctionTimes;
-
 	tf::Executor executor;
 	tf::Taskflow taskflow;
 	std::mutex mutex;
 
-	for (size_t i = 1; i <=p; ++i) {
+	std::vector<std::vector<double>> mextinction;
+	
+	for (size_t i = 0; i < p; ++i) {
+		std::vector<double> vextinction;
+		mextinction.push_back(vextinction);
+		
 		taskflow.emplace(
-			[&r_extinctionTimes, &mutex, ICsamples, i, b] () {
+			[&mextinction, &mutex, ICsamples, i, b] () {
 					/* Calculate the extinction time for each IC
 				using the  Euler-Maruyama scheme */
 				std::random_device rd; // Seed generator
@@ -105,8 +108,8 @@ std::vector<double> extinctionTimes(std::vector<double>& times, double b) {
 				std::normal_distribution<> dStandard(0.0, 1.0); // Standard normal pdf
 				size_t M = ICsamples.size();
 				// For each IC (m) in ICsamples (M)
-				for (int m = 0; m < M; m++) {
-					// start stepping using the
+				for (int m = i*M/p; m < M/p*(i+1); m++) {
+					// start stepping using the EM scheme
 					double Xn = ICsamples[m] ;
 					for (int n = 0; ;n++) {
 						Xn = Xn + (-b)*DT + sqrt(DT)*dStandard(gen);
@@ -115,8 +118,8 @@ std::vector<double> extinctionTimes(std::vector<double>& times, double b) {
 							// record the extinction time Tm=n*dt
 							// break out
 							{
-								std::lock_guard<std::mutex> lock(mutex);
-								r_extinctionTimes.emplace_back(n*DT);
+								//std::lock_guard<std::mutex> lock(mutex);
+								mextinction[i].emplace_back(n*DT);
 							}
 							break;
 						}
@@ -124,10 +127,15 @@ std::vector<double> extinctionTimes(std::vector<double>& times, double b) {
 				}
 			}
 		);
+
 	}
 
 	executor.run(taskflow).wait();
 
+	std::vector<double> r_extinctionTimes;
+	for (size_t i = 0; i < mextinction.size(); ++i) {
+		r_extinctionTimes.insert(r_extinctionTimes.end(), mextinction[i].begin(), mextinction[i].end());
+	}
 	return r_extinctionTimes;
 }
 
