@@ -9,6 +9,8 @@ Created on: Dec 6, 2024
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <taskflow/taskflow.hpp>
+#include <mutex>
 
 #define DT 1e-3  	// time step
 #define MAX_B	10	// Max value of b values to use
@@ -77,58 +79,70 @@ std::vector<double> generateICSamples(std::vector<double>& ICsamples,
 
 // Cumulative probability of extinction - P(t>s)
 // Calculate P(t>s), according to equation (2) in assignment
-std::vector<double> pExtinctionTimes(std::vector<double>& times, double b) {
+std::vector<double> extinctionTimes(std::vector<double>& times, double b) {
 
 	// 'M' value defined in assignment
 	constexpr int IC_SAMPLES = 1e4;
+	constexpr size_t p = 4;
 
 	// Initial conditions vector X0
 	std::vector<double> ICsamples;
 	generateICSamples(ICsamples, IC_SAMPLES, b);
 
-	/* Calculate the extinction time for each IC
-       using the  Euler-Maruyama scheme */
-	std::vector<double> extinctionTimes;
-	std::random_device rd; // Seed generator
-	std::mt19937 gen(rd()); // Random number generator
-	std::normal_distribution<> dStandard(0.0, 1.0); // Standard normal pdf
-	// For each IC (m) in ICsamples (M)
-	for (int m = 0; m < IC_SAMPLES; m++) {
-		// start stepping using the
-		double Xn = ICsamples[m] ;
-		for (int n = 0; ;n++) {
-			Xn = Xn + (-b)*DT + sqrt(DT)*dStandard(gen);
-			// if Xn<=0
-			if (Xn <= 0) {
-				// record the extinction time Tm=n*dt
-				// break out
-				extinctionTimes.emplace_back(n*DT);
-				break;
-			}
-		}
+	std::vector<double> r_extinctionTimes;
 
-		// // Calculation of probability
-		// // for each time in times
-		// std::vector<double> probability;
-		// for(size_t n = 0; n < times.size(); n++){
-		// 	double sum = 0;
-		// 	for(int m = 0; m < IC_SAMPLES; m++){
-		// 		sum += (extinctionTimes[m] > times[n]);
-		// 	}
-		// 	probability.emplace_back(sum / IC_SAMPLES);
-		// }
-		// return probability;
+	tf::Executor executor;
+	tf::Taskflow taskflow;
+	std::mutex mutex;
+
+	for (size_t i = 1; i <=p; ++i) {
+		taskflow.emplace(
+			[&r_extinctionTimes, &mutex, ICsamples, i, b] () {
+					/* Calculate the extinction time for each IC
+				using the  Euler-Maruyama scheme */
+				std::random_device rd; // Seed generator
+				std::mt19937 gen(rd()); // Random number generator
+				std::normal_distribution<> dStandard(0.0, 1.0); // Standard normal pdf
+				size_t M = ICsamples.size();
+				// For each IC (m) in ICsamples (M)
+				for (int m = 0; m < M; m++) {
+					// start stepping using the
+					double Xn = ICsamples[m] ;
+					for (int n = 0; ;n++) {
+						Xn = Xn + (-b)*DT + sqrt(DT)*dStandard(gen);
+						// if Xn<=0
+						if (Xn <= 0) {
+							// record the extinction time Tm=n*dt
+							// break out
+							{
+								std::lock_guard<std::mutex> lock(mutex);
+								r_extinctionTimes.emplace_back(n*DT);
+							}
+							break;
+						}
+					}
+				}
+			}
+		);
 	}
 
+	executor.run(taskflow).wait();
+
+	return r_extinctionTimes;
+}
+
+std::vector<double> pExtinctionTimes(std::vector<double>& times ,double b) {
+	std::vector<double> r_extinctionTimes = extinctionTimes(times, b);
 	// Calculation of probability
 	// for each time in times
 	std::vector<double> probability;
+	size_t M = r_extinctionTimes.size();
 	for (size_t n = 0; n < times.size(); n++) {
 		double sum = 0;
-		for (int m = 0; m < IC_SAMPLES; m++) {
-			sum += (extinctionTimes[m] > times[n]);
+		for (int m = 0; m < M; m++) {
+			sum += (r_extinctionTimes[m] > times[n]);
 		}
-		probability.emplace_back(sum / IC_SAMPLES);
+		probability.emplace_back(sum / M);
 	}
 	return probability;
 }
