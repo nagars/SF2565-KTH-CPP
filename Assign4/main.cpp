@@ -9,8 +9,10 @@ Created on: Dec 6, 2024
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <taskflow.hpp>
+#include <string>
 #include <mutex>
+#include <taskflow.hpp>
+#include <timer.hpp>
 
 #define DT 				1e-3  	// time step
 #define MAX_B			10		// Max value of b values to use
@@ -250,6 +252,10 @@ std::vector<double> probabilityExtinctionTimes(std::vector<double>& times,
 
 
 int main() {
+
+	using namespace std::chrono;
+	sf::Timer timer;
+
 	// Create a vector of times
 	std::vector<double> timesteps;
 	for(double i = 0; i < 1; i+=DT)
@@ -264,22 +270,28 @@ int main() {
 	std::vector<std::vector<double>> extinctionTimes;
 
 	/* ######## TASK 1 ######### */
+	timer.start("Elapsed time 1 Thread: ");
 	// Calculate extinction times in Serial
 	for(size_t n = 0; n < b.size(); n++){
 		extinctionTimes.emplace_back(
 				probabilityExtinctionTimes(timesteps, b[n],
 						THREADS_DISABLE)
 		);
-	}
+	}timer.stop();
+
 
 	/* ######## TASK 2 ######### */
+	std::string str("Elapsed time ");
+	str += std::to_string(NUM_THREADS);
+	str += " Threads: ";
+	timer.start(str);
 	// Calculate extinction times in parallel
 	for(size_t n = 0; n < b.size(); n++){
 		extinctionTimes.emplace_back(
 				probabilityExtinctionTimes(timesteps, b[n],
 						THREADS_ENABLE)
 		);
-	}
+	}timer.stop();
 
 	printToFile(extinctionTimes, b, timesteps);
 
