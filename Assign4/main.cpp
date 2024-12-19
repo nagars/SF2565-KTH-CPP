@@ -17,7 +17,7 @@ Created on: Dec 6, 2024
 #define DT 				1e-3  	// time step
 #define MAX_B			10		// Max value of b values to use
 #define B_VAL_INCREMENT 1		// b value increment
-#define M				5e5		// M value defined in assignment
+#define M				1e4		// M value defined in assignment
 
 
 void printToFile(const std::vector<std::vector<double>> extinctionTimes,
@@ -127,7 +127,7 @@ std::vector<double> extinctionTimesParallel(
 	std::vector<std::vector<double>> mextinction;
 
 	// Initialise each thread
-	for (int i = 0; i < numThreads; ++i) {
+	for (int i = 0; i <= numThreads; ++i) {
 
 		// Stores each threads extinction times
 		// Assigned to vector of windows declared above
@@ -268,8 +268,8 @@ int main() {
 	std::vector<std::vector<double>> extinctionTimes;
 
 	// Calculate for different number of threads
-	std::cout << "Threads | Time Taken (ms): " << std::endl;
-	for(uint16_t threads = 1; threads < 10; threads++){
+	std::cout << "Threads | Time Taken: " << std::endl;
+	for(uint16_t threads = 1; threads < 16384; threads++){
 		extinctionTimes.clear();
 		timer.start(std::to_string(threads));
 		// Calculate extinction times in parallel

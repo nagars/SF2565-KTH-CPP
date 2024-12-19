@@ -102,22 +102,22 @@ namespace sf
       }
       else
       {
-        std::cout << m_message << " took ";
+        std::cout << m_message << ",";
       }
 
       m_message.clear();
       
       if (dur < 5e-3)
       {
-        std::cout << dur * 1e6 << "us";
+        std::cout << dur * 1e6 << ",us";
       }
       else if (dur < 5.)
       {
-        std::cout << dur * 1e3 << "ms";
+        std::cout << dur * 1e3 << ",ms";
       }
       else
       {
-        std::cout << dur << "s";
+        std::cout << dur << ",s";
       }
       std::cout << std::endl;
     }
