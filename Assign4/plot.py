@@ -36,10 +36,10 @@ def plot_probabilities(x_path, y_path, pointsize=0.1, linewidth=0.4):
     return ax
 
 
-# x_path = 'xdata.txt'#PATH_TO_YOUR_X_FILE_HERE'
-# y_path = 'ydata.txt'#PATH_TO_YOUR_Y_FILE_HERE'
-x_path = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign4\Task1\xdata'
-y_path = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign4\Task1\ydata'
+x_path = 'xdata'#PATH_TO_YOUR_X_FILE_HERE'
+y_path = 'ydata'#PATH_TO_YOUR_Y_FILE_HERE'
+#x_path = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign4\Task1\xdata'
+#y_path = r'C:\Users\aless\Documents\KTH_EngMech\SF2565\SF2565\Assign4\Task1\ydata'
 
 ax = plot_probabilities(x_path, y_path)
 plt.show()
