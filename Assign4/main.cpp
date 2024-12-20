@@ -18,7 +18,7 @@ Created on: Dec 6, 2024
 #define MAX_B			10		// Max value of b values to use
 #define B_VAL_INCREMENT 1		// b value increment
 #define M				1e4		// M value defined in assignment
-
+#define THREADS_NUM		400		// Number of threads for parallel calc
 
 void printToFile(const std::vector<std::vector<double>> extinctionTimes,
 		const std::vector<double> b_vals,
@@ -269,7 +269,7 @@ int main() {
 
 	// Calculate for different number of threads
 	std::cout << "Threads | Time Taken: " << std::endl;
-	for(uint16_t threads = 1; threads < 16384; threads++){
+	for(uint16_t threads = 1; threads < THREADS_NUM; threads++){
 		extinctionTimes.clear();
 		timer.start(std::to_string(threads));
 		// Calculate extinction times in parallel
