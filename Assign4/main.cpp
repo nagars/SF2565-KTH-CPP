@@ -18,7 +18,7 @@ Created on: Dec 6, 2024
 #define MAX_B			10		// Max value of b values to use
 #define B_VAL_INCREMENT 1		// b value increment
 #define M				2e5		// M value defined in assignment
-#define THREADS_NUM		512		// Number of threads for parallel calc
+#define THREADS_NUM		512		// Max number of threads for parallel calc
 #define WINDOWS_NUM		1000	// Number of windows to divide IC vec into (jobs)
 
 void printToFile(const std::vector<std::vector<double>> extinctionTimes,
@@ -230,7 +230,7 @@ int main() {
 		// Calculate extinction times in parallel
 		for(size_t n = 0; n < b.size(); n++)
 			extinctionTimes.emplace_back(
-				probabilityExtinctionTimes(timesteps, b[n],	threads)
+				probabilityExtinctionTimes(timesteps, b[n],	512)
 			);
 
 		timer.stop();
